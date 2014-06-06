@@ -1,0 +1,32 @@
+
+apply plugin: 'scala'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+repositories {
+  mavenCentral()
+  maven { url "http://oss.sonatype.org/content/groups/public/" }
+}
+
+dependencies {
+  compile 'io.netty:netty-all:4.0.13.Final'
+  compile 'org.fusesource.scalate:scalate-core_2.10:1.6.1'
+  compile 'commons-codec:commons-codec:1.8'
+  compile 'org.json4s:json4s-jackson_2.10:3.2.6'
+  compile 'org.scala-lang:scala-pickling_2.10:0.8.0'
+  compile 'org.scala-lang:scala-library:2.10.2'
+  compile 'org.apache.logging.log4j:log4j-api:2.0-beta9'
+}
+
+
+tasks.withType(ScalaCompile) {
+  scalaCompileOptions.useAnt = false
+}
+
+task runTest(type: JavaExec, dependsOn: classes) {
+  main = 'org.microsauce.netty.HelloWorld'
+  classpath sourceSets.main.runtimeClasspath
+  classpath sourceSets.test.runtimeClasspath
+  classpath configurations.runtime
+//  debug = true
+}
