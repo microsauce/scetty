@@ -15,16 +15,8 @@ object HttpRouteMiddlewareRequestHandler {
   val logger = Logger.getLogger(HttpRouteMiddlewareRequestHandler.getClass.toString)
 }
 
-/**
- * TODO
- *   we can remove @Sharable if we pass the router list in
- */
-@Sharable
-class HttpRouteMiddlewareRequestHandler /*(
-  val uriRouters:ListBuffer[Router],
-  val socketRouters:ListBuffer[WebSocketRouter],
-  val dataFactory:DefaultHttpDataFactory
-)*/ extends SimpleChannelInboundHandler[/*Any]*/FullHttpRequest] {   // TODO change to Any - remove sharable
+@Sharable class HttpRouteMiddlewareRequestHandler
+  extends SimpleChannelInboundHandler[FullHttpRequest] {
 
   import HttpRouteMiddlewareRequestHandler._
   import scala.concurrent._
@@ -33,15 +25,7 @@ class HttpRouteMiddlewareRequestHandler /*(
   import scala.util.{Try, Success, Failure}
   import org.microsauce.scetty.util.Error
 
-  // websocket data
-//  private val stringBuffer = new StringBuilder()
-//  private var byteBuffer:ListBuffer[Byte] = new ListBuffer[Byte]
-//  private var handShaker:WebSocketServerHandshaker = null
-//  private var wsRoute:ListBuffer[WebSocketHandler] = null
-//  private var httpHandshakeRequest:FullHttpRequest = null
-
   val uriRouters = new ListBuffer[Router]
-  val socketRouters = new ListBuffer[WebSocketRouter]
   // TODO make configurable - Server/Netty config
   val dataFactory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)
 
@@ -65,10 +49,7 @@ class HttpRouteMiddlewareRequestHandler /*(
     }
   }
   
-  def add(router:BaseRouter):Unit = router match {
-    case rtr : Router => uriRouters += rtr
-    case wsRtr : WebSocketRouter => socketRouters += wsRtr
-  }
+  def add(router:Router):Unit = uriRouters += router
 
   /**
    * Responding with status 404.  This handler is the final handler in every route.
@@ -78,14 +59,6 @@ class HttpRouteMiddlewareRequestHandler /*(
       HttpResponseStatus.NOT_FOUND,
       s"file not found ${req.getUri}",
       "text/plain").toFuture
-  }
-
-  def getWsRoute(verb:HttpVerb, uri:String) = {
-    val assembledRoute = new ListBuffer[WebSocketHandler]
-    for ( thisRouter <- socketRouters ) {
-      assembledRoute ++= thisRouter.getWSRoute(uri)
-    }
-    assembledRoute
   }
 
   def getRoute(verb: HttpVerb, uri: String, isError:Boolean) = {
@@ -103,63 +76,20 @@ class HttpRouteMiddlewareRequestHandler /*(
     else assembledRoute += new HttpRequestHandler(GET,new UriPattern("*","""/.*""".r, List()),fileNotFound)
   }
 
-  // TODO inject handlers (http/websocket) rather than match case
-  // TODO sealed case class Handler
-  // case class HttpRequestHandler ext Handler
-  // case class WSHandler ext Handler
-
   override def channelRead0(ctx: ChannelHandlerContext, /*message:Any*/request: FullHttpRequest) {
-//    message match {
-//      case request : FullHttpRequest =>
-        val verb = request.getMethod.toString match {
-          case "GET" => GET
-          case "POST" => POST
-          case "PUT" => PUT
-          case "DELETE" => DELETE
-          case _ => GET // default
-        }
+    val verb = request.getMethod.toString match {
+      case "GET" => GET
+      case "POST" => POST
+      case "PUT" => PUT
+      case "DELETE" => DELETE
+      case _ => GET // default
+    }
 
-//        val wsRoute = getWsRoute(verb,request.getUri)
-//        if ( wsRoute.size > 0 ) {
-//          handShake(ctx,request,wsRoute)
-//        } else {
-          val route = getRoute(verb, request.getUri,false)
+    val route = getRoute(verb, request.getUri,false)
 
-          val tryFutureResponse = execRoute(new Request(verb, request, route, dataFactory))
-          sendHttpResponse(verb,tryFutureResponse,ctx,request)
-//        }
-
-//      case close : CloseWebSocketFrame =>
-//        handShaker.close(ctx.channel(), close.retain)
-
-//      case frame: WebSocketFrame =>
-//        handleSocketFrame(ctx,frame)
-//    }
+    val tryFutureResponse = execRoute(new Request(verb, request, route, dataFactory))
+    sendHttpResponse(verb,tryFutureResponse,ctx,request)
   }
-
-//  private def handShake(ctx:ChannelHandlerContext,httpRequest:FullHttpRequest,wsRoute:ListBuffer[WebSocketHandler]) {
-//    import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory._
-//
-//    this.wsRoute = wsRoute
-//    this.httpHandshakeRequest = httpRequest
-//
-////    // TODO channel registration ???   uri => channel
-////    ChannelRegistry.register(httpRequest.getUri, ctx.channel)
-//
-//    val wsFactory = new WebSocketServerHandshakerFactory(
-//      s"ws://${httpRequest.headers.get(HttpHeaders.Names.HOST)}${httpRequest.getUri}", null, false)
-//    handShaker = wsFactory.newHandshaker(httpRequest)
-//    if (handShaker == null) sendUnsupportedWebSocketVersionResponse(ctx.channel)
-//    else handShaker.handshake(ctx.channel, httpRequest)
-//  }
-
-//  private def execWSRoute(rawMessage:Any) = {
-//    var message = rawMessage
-//    for ( handler <- wsRoute ) {
-//      message = handler.callBack(message)
-//    }
-//    message
-//  }
 
   private def sendHttpResponse(verb:HttpVerb, tryFutureResponse:Try[Future[Response]],ctx:ChannelHandlerContext,request:FullHttpRequest) {
     tryFutureResponse match {
@@ -194,45 +124,6 @@ class HttpRouteMiddlewareRequestHandler /*(
   private def writeResponse(ctx:ChannelHandlerContext,response:Response)= {
       ctx.write(response.nettyResponse)
       ctx.writeAndFlush(response.nettySource).addListener(closeChannel)
-//    response.write(ctx.channel)
-//    ctx.channel.write(response.nettyResponse)
-//    ctx.channel.writeAndFlush(response.nettySource).addListener(closeChannel)
   }
-
-//  private def handleSocketFrame(ctx:ChannelHandlerContext,socketFrame:WebSocketFrame):Unit = {
-//    val messageComplete = socketFrame.isFinalFragment
-//    var isBinary = false
-//    val incomingMessage = socketFrame match {
-//      case textFrame:TextWebSocketFrame =>
-//        stringBuffer append textFrame.text
-//        if ( messageComplete ) stringBuffer.toString
-//        else null
-//
-//      case binaryFrame:BinaryWebSocketFrame =>
-//        byteBuffer ++= binaryFrame.content.array
-//        if ( binaryFrame.isFinalFragment ) byteBuffer.toArray
-//        else null
-//
-//      case continuationFrame:ContinuationWebSocketFrame =>
-//        if ( continuationFrame.isFinalFragment ) {
-//          if ( continuationFrame.aggregatedText != null ) {
-//            execWSRoute(continuationFrame.aggregatedText)
-//          } else {
-//            val messageContent = new Array[Byte](continuationFrame.content.readableBytes)
-//            continuationFrame.content.readBytes(messageContent)
-//            execWSRoute(messageContent)
-//          }
-//        } else null
-//    }
-//
-//    if ( messageComplete ) {
-//      stringBuffer.clear
-//      byteBuffer.clear
-//      val response = execWSRoute(incomingMessage)
-//      // TODO send the response   - responseType will be the same as the request (text/binary)
-//      // TODO how to handle broadcast - pushing messages to other channels
-//    }
-//
-//  }
 
 }

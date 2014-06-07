@@ -3,10 +3,10 @@ package org.microsauce.scetty
 import scala.util.matching.Regex
 
 /**
- * This encapsulates a regular expression (derived from the handler uri pattern) and the
- * list of associated embedded uri identifiers
+ * This class encapsulates a regular expression (derived from the handler uri pattern) and the
+ * list of embedded identifiers
  */
-case class UriPattern(val uriPatternString:String, val regex: Regex, val params: List[String])
+case class UriPattern(uriPatternString:String, regex: Regex, params: List[String])
 
 /**
  * This object defines functions for handling request uri's and uri patterns.

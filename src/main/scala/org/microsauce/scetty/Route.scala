@@ -8,5 +8,5 @@ import scala.collection.mutable.ListBuffer
 sealed trait Route
 
 case class HttpRoute(handlers:ListBuffer[HttpRequestHandler]) extends Route
-case class WSRoute(handlers:ListBuffer[WebSocketHandler]) extends Route
+
 

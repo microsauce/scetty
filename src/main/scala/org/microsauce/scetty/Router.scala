@@ -8,32 +8,8 @@ import io.netty.handler.codec.http.HttpHeaders.Names._
 import org.microsauce.scetty.coder.Coder
 
 /**
- * TODO
- *   define a Router subtrait for websocket applications - make it compatible with standard http routers
- *
- *   handshake("/chat") { req =>
- *   }
- *   endpoint("/chat") { req =>
- *     // what kind of message is this ?
- *
- *     OK(json(data)).toFuture
- *   }
- *
- * TODO
- *  buffer wrapper
- *   - toString or s
- *   - toBytes or b
- *
- *
- * TODO test req and req.sess also
- * val myObject = req[MyType]("myObject")
- * val mySessObject = req.sess[MyType]("mySessObject")
- *
- * TODO clear session
- */
-
-/**
- * The Router companion object defines default values, commonly used middleware handlers, and implicit extension classes
+ * The Router companion object defines default values, commonly used middleware handlers, and implicit
+ * extension classes
  */
 object Router {
 
@@ -383,22 +359,14 @@ trait Router extends BaseRouter {
   def ERR(bytes:Array[Byte],contentType:String) = {
     new Response(HttpResponseStatus.INTERNAL_SERVER_ERROR/*500*/,bytes,contentType)
   }
+
   def NOT_FOUND(str:String):Response = {
     NOT_FOUND(str,"text/html")
   }
+
   def NOT_FOUND(str:String,contentType:String) = {
     new Response(HttpResponseStatus.NOT_FOUND/*404*/,str,contentType)
   }
-
-//  /**
-//   * Register a GET request handler.
-//   * @param uriPattern
-//   * @param handler a callback function taking a Request parameter and returning a Future[Response]
-//   * @return Unit
-//   */
-//  def get(uriPattern: String)(handler: Request => Future[Response]) {
-//    addHandler(GET, uriPattern, handler)
-//  }
 
   /**
    * Register a POST request handler.
@@ -411,7 +379,7 @@ trait Router extends BaseRouter {
   }
 
   /**
-   * Register a GET request handler.
+   * Register a PUT request handler.
    * @param uriPattern
    * @param handler a callback function taking a Request parameter and returning a Future[Response]
    * @return Unit
@@ -419,12 +387,32 @@ trait Router extends BaseRouter {
   def put(uriPattern: String)(handler: Request => Future[Response]) {
     addHandler(PUT, uriPattern, handler)
   }
+
+  /**
+   * Register a DELETE request handler.
+   * @param uriPattern
+   * @param handler a callback function taking a Request parameter and returning a Future[Response]
+   * @return Unit
+   */
   def delete(uriPattern: String)(handler: Request => Future[Response]) {
     addHandler(DELETE, uriPattern, handler)
   }
+
+  /**
+   * Register a middleware handler.
+   * @param uriPattern
+   * @param handler a callback function taking a Request parameter and returning a Future[Response]
+   * @return Unit
+   */
   def use(uriPattern: String)(handler: Request => Future[Response]) {
     addHandler(USE, uriPattern, handler)
   }
+
+  /**
+   * Register a middleware handler.
+   * @param handler a callback function taking a Request parameter and returning a Future[Response]
+   * @return Unit
+   */
   def use(handler: Request => Future[Response]) {
     addHandler(USE, "*", handler)
   }
@@ -433,13 +421,5 @@ trait Router extends BaseRouter {
     val uriPattern = parseUriString(uriString)
     uriHandlers += new HttpRequestHandler(verb, uriPattern, handler)
   }
-
-//  def getRoute(verb: HttpVerb, uri: String) = {
-//    uriHandlers.filter { handler => if (
-//        (verb == handler.verb || handler.verb.verb == "use") &&
-//          handler.uriPattern.regex.pattern.matcher(uri).matches
-//      ) true else false
-//    }
-//  }
 
 }

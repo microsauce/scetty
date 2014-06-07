@@ -26,10 +26,4 @@ trait BaseRouter {
     uriHandlers += new HttpRequestHandler(verb, uriPattern, handler)
   }
 
-//  def parseUriString(uriPattern: String): UriPattern = {
-//    val params = identifiersInOrder(uriPattern)
-//    val rtPattern = runtimePattern(uriPattern, uriParmPattern, replacementPattern)
-//    new UriPattern(uriPattern, rtPattern, params)
-//  }
-
 }

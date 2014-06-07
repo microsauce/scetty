@@ -8,7 +8,6 @@ import scala.concurrent.Future
 sealed abstract class Handler {
   val verb: HttpVerb
   val uriPattern: UriPattern
-//  val callBack: Request => Future[Response]
 
   override def toString = {
     s"[method: ${verb} - $uriPattern]"
@@ -16,14 +15,7 @@ sealed abstract class Handler {
 }
 
 case class HttpRequestHandler(
-  val verb: HttpVerb,
-  val uriPattern: UriPattern,
-  val callBack : Request=>Future[Response]
-) extends Handler
-
-case class WebSocketHandler(
-  val verb: HttpVerb,
-  val uriPattern: UriPattern,
-  val callBack : Any=>Future[Any],
-  val endPoint : Boolean
+  verb: HttpVerb,
+  uriPattern: UriPattern,
+  callBack : Request=>Future[Response]
 ) extends Handler

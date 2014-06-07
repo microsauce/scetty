@@ -15,7 +15,6 @@ import org.json4s.jackson.Serialization.{read, write}
 class Json(val obj:AnyRef) {
   implicit val formats = Serialization.formats(NoTypeHints)
   override def toString = {
-  //  JacksMapper.writeValueAsString(obj)
     write(obj)
   }
 }

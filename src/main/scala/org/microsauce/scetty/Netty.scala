@@ -1,70 +1,5 @@
 package org.microsauce.scetty
 
-/*
-
-TODO add compression to the channel pipeline  ???
-
-TODO siggy coder
-  - append an encrypted md5 digest of session data
-  -
-
-TODO - session cookie(s) should expire after 20 min by default
-TODO - put each session attribute in its own cookie
-TODO - throw exception when cookie size exceeds max
-
-TODO - is ssl broken
-
-TODO - cleanup channel init code.
-- define a base implementation
-- prepend => before
-- append => after
--- these methods will modify the default channel init objects
--- also provide channelInitializer method to allow user defined channel initializers (extending one of the base implementations)
-
-TODO - test secure cookies ???
-
-
-TODO websockets ??? postpone
-
-Features:
-- light-weight routing and middleware api
-- pimped netty request object
-- support for multiple routers
-- Scalate integration
-- session support (client-side)
-- json de-serialization
-- coders
-
-What is NettyRouter ?
-	- Request Wrapper
-		- request attribute support
-		- session attribute support
-		 - client side (cookie-based)
-		 - encrypted
-		 - use in conjunction with Scala Pickling to persist non-string types
-	- route/middleware handler
-		- support for multiple routers (done)
-	- Router trait
-		- scalate integration
-	- Netty wrapper with default channel pipeline initializer
-
-
-Router Config:
-- document root
-- template root
-- template caching
-- template reload
-
-Netty Config:
-- chunk size (aggregator)
-- HttpRequestDecoder
-- HttpObjectAggregator
-- HttpResponseEncoder
-
- 
-*/
-
-//import scala.concurrent._
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelPipeline
 import io.netty.channel.nio.NioEventLoopGroup
@@ -86,7 +21,6 @@ import java.net.InetAddress
  */
 class Netty {
 
-//  private var _host = "localhost"
   private var _inetAddress:InetAddress = InetAddress.getLocalHost
   private var _port = 80
   private var _maxInitialLineLength = 4096
@@ -292,8 +226,6 @@ class Netty {
     }
     serverBootstrap()
   }
-
-//  def startWebSocket
 
 }
 
