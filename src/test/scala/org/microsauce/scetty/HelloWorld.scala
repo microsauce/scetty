@@ -64,5 +64,5 @@ object HelloWorld extends DefaultRouter with App {
     OK(json(Dog("Sally",age))).toFuture
   }
 
-  new Netty().router(HelloWorld).address("localhost").port(8888).start
+  new Scetty().router(HelloWorld).address("localhost").port(8888).start
 }

@@ -51,6 +51,8 @@ object HttpRouteMiddlewareRequestHandler {
   
   def add(router:Router):Unit = uriRouters += router
 
+  def first(router:Router):Unit = uriRouters.insert(0,router)
+
   /**
    * Responding with status 404.  This handler is the final handler in every route.
    */

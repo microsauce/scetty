@@ -16,7 +16,7 @@ object Router {
   import scala.collection.mutable._
   import ExecutionContext.Implicits.global
 
-  private val CHUNK_LEN = 4000
+  private val CHUNK_LEN = 4000 // bytes - TODO make configurable
   private val SESSION_ID = "jsession_"
 
   def docRoot = System.getProperty("user.dir") + "/docs"
@@ -52,7 +52,7 @@ object Router {
 
   /**
    * Construct a middleware handler that adds session support to an application.
-   * @param coder a composable coder instanse
+   * @param coder a composable coder instance
    * @return
    */
   def sessionSupport(coder:Coder[Array[Byte],Array[Byte]]):Request=>Future[Response] = {
@@ -77,6 +77,7 @@ object Router {
       for ( response <- futureResponse ) {
         val sessionCookies = chunkedSession(encryptedSession)
         sessionCookies.foreach { cookie:Cookie =>
+          cookie.setMaxAge(20*60)
           response.nettyResponse.headers.add("Set-Cookie",ServerCookieEncoder.encode(cookie))
         }
       }
@@ -197,7 +198,7 @@ trait Router extends BaseRouter {
 
   protected override val uriHandlers = scala.collection.mutable.ListBuffer[/*Handler*/HttpRequestHandler]()
   lazy protected val templateFolder = new File(templateRoot)
-  lazy protected val templateEngine = initTemplateEngine
+  lazy protected val templateEngine = createScalateEngine
 
   /**
    * A handler which responds with the static resource matching the request uri.  This
@@ -209,7 +210,7 @@ trait Router extends BaseRouter {
     else req.next
   }
 
-  private def initTemplateEngine = {
+  private def createScalateEngine = {
     val engine = new TemplateEngine
     engine.workingDirectory = templateFolder
     engine

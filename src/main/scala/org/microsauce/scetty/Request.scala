@@ -86,11 +86,12 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
    * @tparam T
    * @return
    */
-  def json[T:Manifest] = {
+  def json[T:Manifest]:T = {
     assert(contentType.startsWith("application/json"),s"Content-Type application/json expected, instead found $contentType")
     val jsonStr = bodyString
-    if ( jsonStr != null ) read[T](jsonStr)
-    else null
+//    if ( jsonStr != null ) read[T](jsonStr)
+//    else null
+    read[T](jsonStr)
   }
 
   /**

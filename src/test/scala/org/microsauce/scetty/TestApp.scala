@@ -16,7 +16,7 @@ case class UserData(val name:String,val age:Int, weight:Double,pets:List[Pet])
 object TestApp extends App {
 
   import org.microsauce.scetty.Router._
-  
+
   println (s"working directory: ${System.getProperty("user.dir")}")
 //  import Transform._
   
@@ -25,6 +25,10 @@ object TestApp extends App {
 //    use("/json:theRest") { req =>
 //      if ( req.contentType.startsWith( "application/json" ) ) req("object") = req.content.array
 //    }
+
+    use { req =>
+      req.next
+    }
 
     use("/secure/:any") { req =>
       req.next
@@ -167,7 +171,7 @@ println(s"the json payload: $contentAsString")
 
   }
   
-  new Netty()
+  new Scetty()
   
   	// routers
     .router(new MyRouter(docRoot,templateRoot))

@@ -19,9 +19,9 @@ import java.net.InetAddress
  * initializer.  It provides a default HTTP/HTTPS channel initializer and an
  * intuitive/user-friendly API for instantiating and configuring Netty HTTP/HTTPS servers.
  */
-class Netty {
+class Scetty {
 
-  private var _inetAddress:InetAddress = InetAddress.getLocalHost
+  private var _inetAddress:InetAddress = InetAddress.getByName("localhost")
   private var _port = 80
   private var _maxInitialLineLength = 4096
   private var _maxHeaderSize = 8192
@@ -131,6 +131,11 @@ class Netty {
    */
   def router(router:Router) = {
     routeHandler.add(router)
+    this
+  }
+
+  def first(router:Router) = {
+    routeHandler.first(router)
     this
   }
 
