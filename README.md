@@ -1,7 +1,7 @@
 Scetty
 ======
 
-Scetty is a simple library for quickly writing HTTP Netty servers in Scala. 
+Scetty is a simple library for writing Netty HTTP servers in Scala. 
 
 ## Features:
 * Sinatra-style URI based routing
