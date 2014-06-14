@@ -50,12 +50,20 @@ object Router {
     futureResponse
   }
 
+//  def sessionSupport:Request=>Future[Response] = {
+//    sessionSupport(20*60,coder)  // TODO do nothing coder
+//  }
+
+  def sessionSupport(coder:Coder[Array[Byte],Array[Byte]]):Request=>Future[Response] = {
+    sessionSupport(20*60,coder)
+  }
+
   /**
    * Construct a middleware handler that adds session support to an application.
    * @param coder a composable coder instance
    * @return
    */
-  def sessionSupport(coder:Coder[Array[Byte],Array[Byte]]):Request=>Future[Response] = {
+  def sessionSupport(timeout:Int,coder:Coder[Array[Byte],Array[Byte]]):Request=>Future[Response] = {
     import scala.pickling._
     import binary._
 
@@ -77,7 +85,7 @@ object Router {
       for ( response <- futureResponse ) {
         val sessionCookies = chunkedSession(encryptedSession)
         sessionCookies.foreach { cookie:Cookie =>
-          cookie.setMaxAge(20*60)
+          cookie.setMaxAge(timeout)
           response.nettyResponse.headers.add("Set-Cookie",ServerCookieEncoder.encode(cookie))
         }
       }

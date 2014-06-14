@@ -184,8 +184,8 @@ println(s"the json payload: $contentAsString")
 //    .keypass("password")
     
     // server config
-//    .address("localhost")
-    .address("192.168.1.2")
+    .address("localhost")
+//    .address("192.168.1.2")
     .port(80)
 //    .address("192.168.1.2")
 //    .port(443)
