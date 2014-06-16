@@ -71,7 +71,7 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
   }
 
   /**
-   * Retrieve a query parameter value by key.
+   * Retrieve a query string parameter value by key.
    * @param key
    * @return
    */
@@ -166,6 +166,12 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
    * @return
    */
   def getMethod = req.getMethod
+
+  /**
+   * @see <a href="http://netty.io/5.0/api/io/netty/handler/codec/http/HttpRequest.html#getMethod()">netty.io</a>
+   * @return
+   */
+  def method = req.getMethod
 
   /**
    * @see <a href="http://netty.io/5.0/api/io/netty/handler/codec/http/HttpRequest.html#getUri()">netty.io</a>

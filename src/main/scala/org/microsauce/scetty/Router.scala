@@ -187,6 +187,12 @@ object Router {
   implicit class ByteS(bytes:Array[Byte]) {
     def s = new String(bytes, "utf-8")
   }
+
+  /**
+   * This implicit class provides the following al
+   * @param opt
+   * @tparam A
+   */
   implicit class TerseOption[A](opt:Option[A]) {
     def |(any:A) = if (opt.isEmpty) any else opt.get
   }
