@@ -13,7 +13,8 @@ Scetty is a simple library for writing Netty HTTP servers in Scala.
 * A feature rich Request class adding support for cookies, sessions, uri parameters, attributes, json deserialization, and more ...
 
 
-* * * CAUTION! THIS README IS A WORK IN PROGRESS * * *
+CAUTION! THIS README IS A WORK IN PROGRESS
+==========================================
 
 Example (hello scetty):
 ```scala
