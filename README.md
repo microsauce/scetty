@@ -1,160 +1,100 @@
 Scetty
 ======
 
-Scetty is a simple library for writing Netty HTTP servers in Scala. 
+A simple library for writing Netty HTTP servers in Scala.
 
 ## Features:
-* A dynamic-style server DSL for Scala
+* Fully asynchronous IO using Netty and Scala Futures
+* Dynamic-style server DSL for Scala
 * Express.js/Sinatra style routing
 * Convenient and elegant json support
 * Pre-defined middleware: Cookie Support, Session Support (client side)
 * Template engine integration - Scalate by default
+* SSL Support
 * Built on Netty
-* A feature rich Request class adding support for cookies, sessions, uri parameters, attributes, json deserialization, and more ...
+* Request and session attributes, uri, query string, and form parameter maps
 
 
-CAUTION! THIS README IS A WORK IN PROGRESS
-==========================================
+= Getting Started
 
-Example (hello scetty):
+For starters you must define one or more routers and register them with a Scetty instance.  As follows:
+
 ```scala
-
-object HelloApp extends SimpleScettyApp {
-
-  use("/hello/*") { req =>
-    println("hello I'm middleware")
-    req.next
-  }
-
-  get("/hello/:name") { req =>
+class HelloWorld extends DefaultRouter {
+  // hello handler
+  get("/hello/:name") { 
     OK("Hello ${req/"name"}").toFuture
   }
-  
-  start
 }
+
+new Scetty()
+  .router(new HelloWorld())
+  .start
 ```
 
-## Handlers
+You can register multiple routers as follows:
 
-A handler is a function defined to service an HTTP request.  Handlers are of the type Request=>Future[Response].  There are two
-types of handlers:  middleware and end-points.  More on that below.
+```scala
+new Scetty()
+  .router(new MyRouter())
+  .router(new MyOtherRouter())
+  .start
+```
 
-## Routing
+The 'hello' handler in the first example will respond to GET requests to uri's of the form '/hello/*'.  
+
+= Routes
 
 In Scetty a route is a sequence of handlers assembled at runtime to service a given request method and uri.
-
-### Router trait
-
-Routes are defined using one or more routers.  To define a router extend the Router trait and call http verb methods in
-the class body to register your handlers with the Scetty runtime.  For example:
+When Scetty receives a request it scans all registered routers, adds all matching middleware (more on that
+below) and finally appends the first matching HTTP verb handler (get, post, put, or delete) to terminate the sequence:
 
 ```scala
-class MyRouter extends Router {
+// TODO example here
+``` 
 
-  // logging middleware
-  use { req =>
-    println(s"serving ${req.method}: ${req.uri}")
-    val futureResponse = req.next
-    println(s"\t${req.method}: ${req.uri} has been served")
-    futureResponse
-  }
+If no matching verb handler is defined Scetty will presume the request URI represents a static resource (a file) and
+attempt to read it from the file system.
 
-  get("/my/data") { req =>
-    val myData = dataService.getMyData()
-    OK(json(myData)).toFuture
-  }
+== Error Handler
 
-  get("/view/other/data") { req =>
-    val myOtherData = dataService.getOtherMyData()
-    OK(render("/view/mydata.jade", myOtherData)).toFuture
-  }
-
-}
-```
-
-This router defines handlers for retrieving my data and other data.  It also defines middleware (via the "use" method) for
-logging request information to the console.  The single argument version of the method is applied to all request uri's, it
-is equivalent to: use("/*") { req => . . . }
-
-#### Http Verb Methods
-
-The Router trait has five different methods for registering HTTP handlers with the the Scetty runtime.  The four HTTP verb methods
-'get', 'post', 'put', and 'delete' and the middleware method 'use'.
-
-As the names imply, the first four respond to the HTTP methods of the same name.  'use' is for defining middleware.
-
-### URI Patterns
-
-These are simple patterns used to define the request uri's which apply to a given handler.  These patterns may be static
-or they may contain any number of embedded parameter names (or the form :myParameterName) or wildcards (*).  For example,
-to define a middleware handler to apply to all order uris:
+If any of your request handlers fail to handle their own exception control is passed to the default error handler.  The default 
+error handler is defined the same way as any other hander, but it must have a uri pattern of "/error":
 
 ```scala
-  use("/order/*") { req =>
-    . . .
+  get("/error") { req =>
+    ERR(req.error.stackTrace,"text/plain").toFuture
   }
 ```
 
-Or to define an end-point with embedded parameter 'name':
+== More on Middleware
+
+Middleware are all the functions added to your route sequence ahead of the selected, matching end-point.  Middleware 
+can be used to parse and/or decorate the request or it can be used to handle cross-cutting concerns like logging, 
+authentication, data loading, caching, etc.
 
 ```scala
-  get("/hello/:name") { req =>
-    OK(s"Hello ${req/"name"}!").toFuture
-  }
-
+// TODO
 ```
 
-### Middleware
+== URI Patterns
 
-The purpose of middleware in Scetty is to handle cross-cutting concerns, such as authentication, data caching, or logging for
-example.
+=== Parameters
 
-### Response Methods (OK,ERR,NOT_FOUND)
+=== Wildcards
 
-All Scetty handlers must return a Future[Response].  The Router trait provides several convenient methods for creating response
-objects.
+= Request
 
-OK
+== Operators (/ & ? ^^) and apply
 
-ERR
+== Session
 
-NOT_FOUND
+= Futures
 
-### Other Methods (json, render)
+= json
 
-#### json(obj) - AnyRef=>Json
+= Templates
 
-Encapsulate the parameter in a Json object.  This object may be passed to any of the response methods; it will be serialized
-as JSON in the HTTP response with a content type of "application/json".
+= Cookies
 
-```scala
-  get("/dogs") { req =>
-    val allMyDogs = dogService.getMyDogs()
-    OK(json(allMyDogs)).toFuture
-  }
-```
-
-#### render(templatePath,model) - (String,Map[String,Any])=>String
-
-Every Router instance has a "render" variable.  By default this function uses Scalate to render views, however it is a \
-public variable and can be reset to provide support for other template engines if desired.
-
-```scala
-  get("/view/data") { req =>
-    val model = dataService.getMyData()
-    OK(render("/view/data.jade", model)).toFuture
-  }
-```
-
-## Scetty class
-
-The Scetty class is an abstraction encapsulating the Netty runtime.  It provides a default channel pipeline initializer
-implementation, which you can substitute for your own, and many other convenience methods to custom configure your server.
-
-## Request (see netty JavaDoc)
-
-
-## More to Come . . .
-
-For more examples view the src/test/scala folder.
-
+= SimpleScettyApp
