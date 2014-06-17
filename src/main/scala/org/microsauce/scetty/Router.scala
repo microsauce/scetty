@@ -1,6 +1,6 @@
 package org.microsauce.scetty
 
-import java.io.File
+import java.io.{PrintWriter, StringWriter, File}
 import scala.concurrent._
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.http._
@@ -195,6 +195,15 @@ object Router {
    */
   implicit class TerseOption[A](opt:Option[A]) {
     def |(any:A) = if (opt.isEmpty) any else opt.get
+  }
+
+  implicit class StackTraceString(t:Throwable) {
+    def stackTrace = {
+      val stringWriter = new StringWriter()
+      val printWriter = new PrintWriter(stringWriter)
+      t.printStackTrace(printWriter)
+      stringWriter.toString
+    }
   }
 }
 

@@ -99,13 +99,15 @@ object HttpRouteMiddlewareRequestHandler {
         writeResponse(ctx,response)
       }
       case Failure(err) =>
-        val error = new Error(err)
-        logger.severe(error.toString)
+        import org.microsauce.scetty.Router._
+//        val error = new Error(err)
+        logger.severe(err.toString)
         err.printStackTrace()
         val errorRoute = getRoute(GET,"/error",true)
         val errorRequest = new Request(verb, request, errorRoute, dataFactory)
-        errorRequest("_error") = error
-        val res = new Response(HttpResponseStatus.INTERNAL_SERVER_ERROR, s"internal server error: ${err.getMessage} - ${error.toString}","text/plain")
+        //errorRequest("_error") = error
+        errorRequest.error = err
+        val res = new Response(HttpResponseStatus.INTERNAL_SERVER_ERROR, s"internal server error: ${err.getMessage} - ${err.stackTrace}","text/plain")
         if ( errorRoute.size > 0 ) {
           val errorTryFutureResponse = execRoute(errorRequest)
           errorTryFutureResponse match {

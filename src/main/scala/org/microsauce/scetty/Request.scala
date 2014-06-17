@@ -29,6 +29,9 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
+  // TODO implicit class to add stackTrace:Unit=>String method to Throwable
+  var error:Throwable = null
+
   private val queryStringDecoder = new QueryStringDecoder(req.getUri)
   private var uriParameters:Map[String,String] = null
   private var cursor = -1

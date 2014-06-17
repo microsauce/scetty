@@ -14,7 +14,7 @@ object HelloWorld extends DefaultRouter with App {
   }
 
   get("/error") { req =>
-    ERR(s"KA-BOOM: ${req[Error]("_error").toString} - ${req[Error]("_error").stackTrace}").toFuture
+    ERR(s"KA-BOOM: ${req.error.stackTrace}","text/plain").toFuture
   }
 
   get("/boom/boom") { req =>
