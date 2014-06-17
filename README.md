@@ -15,7 +15,7 @@ A simple library for writing Netty HTTP servers in Scala.
 * Request and session attributes, uri, query string, and form parameter maps
 
 
-= Getting Started
+# Getting Started
 
 For starters you must define one or more routers and register them with a Scetty instance.  As follows:
 
@@ -43,7 +43,7 @@ new Scetty()
 
 The 'hello' handler in the first example will respond to GET requests to uri's of the form '/hello/*'.  
 
-= Routes
+# Routes
 
 In Scetty a route is a sequence of handlers assembled at runtime to service a given request method and uri.
 When Scetty receives a request it scans all registered routers, adds all matching middleware (more on that
@@ -56,7 +56,7 @@ below) and finally appends the first matching HTTP verb handler (get, post, put,
 If no matching verb handler is defined Scetty will presume the request URI represents a static resource (a file) and
 attempt to read it from the file system.
 
-== Error Handler
+## Error Handler
 
 If any of your request handlers fail to handle their own exception control is passed to the default error handler.  The default 
 error handler is defined the same way as any other hander, but it must have a uri pattern of "/error":
@@ -67,7 +67,7 @@ error handler is defined the same way as any other hander, but it must have a ur
   }
 ```
 
-== More on Middleware
+## More on Middleware
 
 Middleware are all the functions added to your route sequence ahead of the selected, matching end-point.  Middleware 
 can be used to parse and/or decorate the request or it can be used to handle cross-cutting concerns like logging, 
@@ -77,24 +77,24 @@ authentication, data loading, caching, etc.
 // TODO
 ```
 
-== URI Patterns
+## URI Patterns
 
-=== Parameters
+### Parameters
 
-=== Wildcards
+### Wildcards
 
-= Request
+# Request
 
-== Operators (/ & ? ^^) and apply
+## Operators (/ & ? ^^) and apply
 
-== Session
+## Session
 
-= Futures
+# Futures
 
-= json
+# json
 
-= Templates
+# Templates
 
-= Cookies
+# Cookies
 
-= SimpleScettyApp
+# SimpleScettyApp
