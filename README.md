@@ -12,10 +12,9 @@ The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-
 * Dynamic-style server DSL for Scala
 * Express.js/Sinatra style routing
 * Convenient and elegant json support
-* Pre-defined middleware: Cookie Support, Session Support (client side)
-* Template engine integration - Scalate by default
+* Pre-defined middleware: Cookie Support, Session Support
+* Scalate template integration
 * SSL Support
-* Built on Netty
 * Uri, query string, and form parameter maps
 
 ## Glossary of Terms
