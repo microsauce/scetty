@@ -75,13 +75,17 @@ object TestApp extends App {
     }
     
     post ("/upload/a/binary/file") { req =>
-      val fileBuf = req ^^ "theFile"
-      OK(fileBuf,"image/png").toFuture
+      req ^^ "theFile" match {
+        case Some(fileBuf) => OK(fileBuf,"image/png").toFuture
+        case None => OK("file not found").toFuture
+      }
     }
     
     post ("/upload/a/text/file") { req =>
-      val fileBuf = req ^^ "theFile"
-      OK(fileBuf.toString(Charsets.UTF_8)).toFuture
+      req ^^ "theFile" match {
+        case Some(fileBuf) => OK(fileBuf.toString(Charsets.UTF_8)).toFuture
+        case None => OK("file not found").toFuture
+      }
     }
     
     post("/post/data") { req =>

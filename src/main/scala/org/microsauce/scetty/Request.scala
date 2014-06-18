@@ -65,11 +65,11 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
     // TODO data ==> Attribute, FileUpload, HttpData
   }
   
-  def ^^(key:String) = {
+  def ^^(key:String):Option[ByteBuf] = {
     val data = postRequestDecoder.getBodyHttpData(key)
     data match {
-      case x:FileUpload => x.getByteBuf
-      case _ => null
+      case x:FileUpload => Some(x.getByteBuf)
+      case _ => None
     }
   }
 

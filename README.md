@@ -181,11 +181,13 @@ def update(attrName:String,value:Any) - set the value of a request attribute
 
 def next:Future\[Response\] - execute the next handler in the route
 
-## Additional Values
+## Additional Values/Variables
 
 cookies:Map\[String,String\] - the request cookie map - available only when cookieSupport is in use 
 
 sess:Map\[String,Array\[Byte\]\] - the session attribute map (Note: the session API is not yet final) 
+
+error:Throwable - this variable contains an exception thrown from a handler 
 
 ## Operators (/ & ? ^^) and apply
 
@@ -223,7 +225,7 @@ TODO the session api is not yet finalized
 
 You may recall that handlers must have a return type of Future[Response].  Thus far we have used the .toFuture method
 to create and return a completed Future.  If, however, your handler uses the 'future' construct or makes use of libraries
-that return them you can do the following:
+that return Futures you can do the following:
 
 ```scala
   // example 1: future construct
@@ -241,9 +243,9 @@ that return them you can do the following:
   }
 ```
 
-# json
+# Json
 
-Json data is easily deserialized from the request:
+Json data is easily de-serialized from the request:
 
 ```scala
   case class MyData(name:String, age:Int)
@@ -300,6 +302,7 @@ Thus far we have extended DefaultRouter in our router definitions.  DefaultRoute
 Router values: documentRoot:String and templateRoot:String.
 
 documentRoot: determines the root folder from which this Router will load static resources (files).
+
 templateRoot: determines the root folder from which this Router will load templates.
 
 If these default values are insufficient you may extend the Router trait directly and initialize and initialize
