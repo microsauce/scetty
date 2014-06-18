@@ -318,7 +318,7 @@ val myRouterInstance = new MyRouter("/my/document/root","/my/template/root")
 
 # SimpleScettyApp
 
-To simplify the creation of you can alternatively extend the SimpleScettyApp trait: 
+To simplify the creation of Scetty servers you can alternatively extend the SimpleScettyApp trait: 
 
 ```scala
 object HelloWorld extends SimpleScettyApp {
