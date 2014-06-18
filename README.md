@@ -7,16 +7,6 @@ A simple library for writing Netty HTTP servers in Scala.
 
 The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-hat to the Play framework too.
 
-## Glossary of Terms
-
-**Handler**: a function of type Request=>Future[Response] dispatched to service an HTTP request
-
-**Middleware**: a handler that performs an intermediate task
-
-**Route**: an ordered sequence of handlers assembled to service an HTTP request
-
-**End-Point**: the ultimate handler in the route
-
 ## Features:
 * Build fully asynchronous servers using Netty and Scala Futures
 * Dynamic-style server DSL for Scala
@@ -28,6 +18,15 @@ The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-
 * Built on Netty
 * Uri, query string, and form parameter maps
 
+## Glossary of Terms
+
+**Handler**: a function of type Request=>Future[Response] dispatched to service an HTTP request
+
+**Middleware**: a handler that performs an intermediate task, defined via the 'use' method
+
+**Route**: an ordered sequence of handlers assembled to service an HTTP request
+
+**End-Point**: the ultimate handler in the route, defined via 'get','post','put', or 'delete'
 
 # Getting Started
 
@@ -151,30 +150,169 @@ Wildcard values may also be extracted from the request:
   }
 ```
 
-# Monkey Patches (move to Request section - or make note of it there also)
-
-To provide a terse and (somewhat) intuitive programming DSL several implicit classes are defined in the Router companion object
-and are made available with the following import:
-
-```scala
-import org.microsauce.scetty.Router._
-// TODO
-```
 
 # Request
 
-The Scetty request class wraps a Netty FullHttpRequest object.
+The Scetty Request wraps a Netty FullHttpRequest object and exposes all of its methods 
+(see [FullHttpRequest](http://netty.io/4.0/api/io/netty/handler/codec/http/FullHttpRequest.html)).  It also provides a 
+wealth of additional functionality.
+
+## Additional Methods
+
+def json\[T\]:T - de-serialize the (Json) request body and return an object of the given type
+ 
+def bodyString:String - return the request body content as a String
+
+def contentType:String - return the request content type
+
+def method:String - return the request method
+
+def uri:String - return the request uri (excluding the query string)
+
+def apply\[T\](attrName:String):T - retrieve an attribute from the request as an instance of the given type
+```scala
+  req[MyData]("myData")
+```  
+ 
+def update(attrName:String,value:Any) - set the value of a request attribute
+```scala
+  req("myData") = myData
+```
+
+def next:Future\[Response\] - execute the next handler in the route
+
+## Additional Values
+
+cookies:Map\[String,String\] - the request cookie map - available only when cookieSupport is in use 
+
+sess:Map\[String,Array\[Byte\]\] - the session attribute map (Note: the session API is not yet final) 
 
 ## Operators (/ & ? ^^) and apply
 
+def / (paramName:String):String - retrieve a URI parameter from the request 
+
+def &amp; (paramName:String):Option\[String\] - retrieve a form parameter from the request 
+
+def ? (paramName:String):Option\[String\] - retrieve a query string parameter from the request
+ 
+def ^^ (paramName:String):Option\[ByteBuf\] - retrieve multipart form data as a ByteBuf (for a file update, for example) 
+
+## Monkey Patches
+
+To provide a terse programming DSL an implicit class is defined to augment Option:
+
+```scala
+import org.microsauce.scetty.Router._
+
+. . .
+
+get("/*") { req =>
+  val name = req?"name"|"Jimbo"  // equivalent to req.?("name").getOrElse("Jimbo")
+  . . .
+}
+
+```
+
+The pipe operator in this context is equivalent to the method "getOrElse".
+
 ## Session
+
+TODO the session api is not yet finalized
 
 # Futures
 
+You may recall that handlers must have a return type of Future[Response].  Thus far we have used the .toFuture method
+to create and return a completed Future.  If, however, your handler uses the 'future' construct or makes use of libraries
+that return them you can do the following:
+
+```scala
+  // example 1: future construct
+  get("/compute/:param1/:param2") { req => future {
+      val data = someLongRunningComputation(req/"param1",req/"param2")
+      OK(json(data))  // calling OK from within a future
+    }
+  }
+  
+  // example 2:  
+  get("/data") { req =>
+    val futureData:Future[Data] = getFutureData() 
+    for ( data <- futureData ) 
+      yield OK(render("/data/template.jade", Map("data"->data))) // this for comprehension yields a Future[Response] 
+  }
+```
+
 # json
+
+Json data is easily deserialized from the request:
+
+```scala
+  case class MyData(name:String, age:Int)
+
+  . . .
+
+  post("/my/data") { req =>
+    val myData = req.json[MyData] 
+  }
+```
+
+To serialize an object as Json in the response:
+
+```scala
+  get("/my/data") { req =>
+     . . .
+    OK(json(mydata)).toFuture
+  }
+```
 
 # Templates
 
+To render a template:
+
+```scala
+  get("/view/data") { req =>
+    . . .
+    // render: (String,Map[String,Any]=>String
+    OK(render("/view/data.jade", Map("data"->data))).toFuture
+  }
+```
+
 # Cookies
 
+Cookie support can be added to a Scetty application by adding cookieSupport middleware to a router: 
+
+```scala
+import org.microsauce.scetty.Router._
+. . .
+class CookieEnablingRouter extends DefaultRouter {
+  use(cookieSupport)
+  . . .
+  
+  get("/") { req =>
+    val cookieData = req.cookies("myCookie")
+    . . .
+  }
+}
+```
+
+# Router trait
+
+Thus far we have extended DefaultRouter in our router definitions.  DefaultRouter provides sensible defaults for two 
+Router values: documentRoot:String and templateRoot:String.
+
+documentRoot: determines the root folder from which this Router will load static resources (files).
+templateRoot: determines the root folder from which this Router will load templates.
+
+If these default values are insufficient you may extend the Router trait directly and initialize and initialize
+them yourself:
+  
+```scala
+class MyRouter(val documentRoot:String,val templateRoot:String) extends Router {
+  . . .
+}
+
+val myRouterInstance = new MyRouter("/my/document/root","/my/template/root")
+```
+
 # SimpleScettyApp
+
+To simplify the creation of 
