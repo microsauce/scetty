@@ -10,8 +10,11 @@ The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-
 ## Glossary of Terms
 
 Handler: a function of type Request=>Future[Response] dispatched to service an HTTP request
+
 Middleware: a handler that performs an intermediate task
+
 Route: an ordered sequence of handlers assembled to service an HTTP request
+
 End-Point: the ultimate handler in the route
 
 ## Features:
