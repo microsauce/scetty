@@ -64,6 +64,21 @@ object HelloWorld extends DefaultRouter with App {
     OK(json(Dog("Sally",age))).toFuture
   }
 
+  // reward middleware
+  use("/grade/*") { req =>
+    req("reward") = req/"*_0" match {
+      case "A" => "gold star"
+      case "B" => "silver star"
+      case "C" => "bronze star"
+      case "D" | "F" => "dunce cap"
+    }
+    req.next
+  }
+
+  get("/grade/:grade") { req =>
+    OK(s"The grade ${req/"grade"} has earned you a ${req("reward")}").toFuture
+  }
+
   new Scetty()
     .router(HelloWorld)
     .address("localhost")

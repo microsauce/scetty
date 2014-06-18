@@ -3,9 +3,16 @@ Scetty
 
 A simple library for writing Netty HTTP servers in Scala.
 
-# Introduction
+## Introduction
 
 The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-hat to the Play framework too.
+
+## Glossary of Terms
+
+Handler: a function of type Request=>Future[Response] dispatched to service an HTTP request
+Middleware: a handler that performs an intermediate task
+Route: an ordered sequence of handlers assembled to service an HTTP request
+End-Point: the ultimate handler in the route
 
 ## Features:
 * Build fully asynchronous servers using Netty and Scala Futures
@@ -16,12 +23,12 @@ The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-
 * Template engine integration - Scalate by default
 * SSL Support
 * Built on Netty
-* Request and session attributes, uri, query string, and form parameter maps
+* Uri, query string, and form parameter maps
 
 
 # Getting Started
 
-For starters you must define one or more routers and register them with a Scetty instance.  As follows:
+For starters you must define one or more routers and register them with a Scetty server instance.  As follows:
 
 ```scala
 class HelloWorld extends DefaultRouter {
@@ -47,14 +54,35 @@ new Scetty()
 
 The 'hello' handler in the first example will respond to GET requests to uri's of the form '/hello/*'.  
 
-# Router
+# Routers
 
-In Scetty a route is a sequence of handlers assembled at runtime to service a given request method and uri.
 When Scetty receives a request it scans all registered routers, adds all matching middleware (more on that
-below) and finally appends the first matching HTTP verb handler (get, post, put, or delete) to terminate the sequence:
+below) and finally appends the first matching end-point (defined via get, post, put, or delete):
 
 ```scala
+class GradeRouter extends DefaultRouter {
+
+  // reward middleware
+  use("/grade/*") { req =>
+    req("reward") = req/"*_0" match {
+      case "A" => "gold star"
+      case "B" => "silver star"
+      case "C" => "bronze star"
+      case "D" | "F" => "dunce cap"
+    }
+    req.next
+  }
+
+  // get grade end-point
+  get("/grade/:grade") { req =>
+    OK(s"The grade ${req/"grade"} has earned you a ${req("reward")}").toFuture
+  }
+
+}
 ```
+
+In this example, to service a request to "GET /grade/A" Scetty will create a route beginning with "reward middleware"
+and ending with "get grade end-point" yielding a response of "The grade A has earned you a gold star".
 
 If no matching verb handler is defined Scetty will presume the request URI represents a static resource (a file) and
 attempt to read it from the file system.
@@ -72,23 +100,24 @@ error handler is defined the same way as any other hander, but it must have a ur
 
 ## More on Middleware
 
-Middleware are all the functions added to your route sequence ahead of the selected, matching end-point.  Middleware 
-can be used to parse and/or decorate the request or it can be used to handle cross-cutting concerns like logging, 
-authentication, data loading, caching, etc.
+Middleware can be used to parse and/or decorate the request or it can be used to handle cross-cutting concerns like logging,
+authentication, data loading, caching, etc.  Middleware is defined using the "use" method:
 
 ```scala
-
+// TODO
 ```
 
 ## URI Patterns
 
-All request handlers are bound to a given URI pattern.  URI patterns may contain parameter names and/or wildcards or they may be
+All handlers are bound to a URI pattern.  URI patterns may contain parameter names and/or wildcards or they may be
 static.  For example:
 
 ```scala
-  get("/shoe/:brand/:size") { req => ... } // URI pattern with two parameters.  Matches: GET /shoe/nike/11
+  get("/shoe/:brand/:size") { req => ... } // URI pattern with two parameters.  Matches: "GET /shoe/nike/11" and "GET /shoe/adidas/12"
 
-  get("/dog/*") { req => ... }  // URI pattern with a wildcard. Matches: GET /dog/fido
+  get("/dog/*") { req => ... }  // URI pattern with a wildcard. Matches: "GET /dog/fido" and "GET /dog/rex"
+
+  get("/me/a/cup/of/coffee") { req => ... } // Static URI. Matchs ONLY "GET /me/a/cup/of/coffee"
 ```
 
 ### Parameters
@@ -119,22 +148,20 @@ Wildcard values may also be extracted from the request:
   }
 ```
 
-## Monkey Patches
+# Monkey Patches (move to Request section - or make note of it there also)
 
 To provide a terse and (somewhat) intuitive programming DSL several implicit classes are defined in the Router companion object
 and are made available with the following import:
 
 ```scala
 import org.microsauce.scetty.Router._
-```
-
 // TODO
+```
 
 # Request
 
+The Scetty request class wraps a Netty FullHttpRequest object.
 
-
-##
 ## Operators (/ & ? ^^) and apply
 
 ## Session

@@ -31,6 +31,7 @@ object TestApp extends App {
     }
 
     use("/secure/:any") { req =>
+      req("any")
       req.next
     }
 
