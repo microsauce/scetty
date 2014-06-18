@@ -318,4 +318,15 @@ val myRouterInstance = new MyRouter("/my/document/root","/my/template/root")
 
 # SimpleScettyApp
 
-To simplify the creation of 
+To simplify the creation of you can alternatively extend the SimpleScettyApp trait: 
+
+```scala
+object HelloWorld extends SimpleScettyApp {
+
+  get("/hello/:name") { req =>
+    OK(s"hello there ${req/"name"}").toFuture
+  }
+  
+  start
+}
+```
