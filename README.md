@@ -35,7 +35,7 @@ For starters you must define one or more routers and register them with a Scetty
 class HelloWorld extends DefaultRouter {
   // hello handler
   get("/hello/:name") { 
-    OK("Hello ${req/"name"}").toFuture
+    OK(s"Hello ${req/"name"}").toFuture
   }
 }
 
