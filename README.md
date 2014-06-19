@@ -85,13 +85,13 @@ class GradeRouter extends DefaultRouter {
 In this example, to service a request to "GET /grade/A" Scetty will create a route beginning with "reward middleware"
 and ending with "get grade end-point" yielding a response of "The grade A has earned you a gold star".
 
-If no matching verb handler is defined Scetty will presume the request URI represents a static resource (a file) and
+If no matching end-point is defined Scetty will presume the request URI represents a static resource (a file) and
 attempt to read it from the file system.
 
 ## Error Handler
 
 If any of your request handlers fail to handle their own exception control is passed to the default error handler.  The default 
-error handler is defined the same way as any other hander, but it must have a uri pattern of "/error":
+error handler is defined the same way as any other GET handler, but it must have a uri pattern of "/error":
 
 ```scala
   get("/error") { req =>
@@ -105,8 +105,23 @@ Middleware can be used to parse and/or decorate the request or it can be used to
 authentication, data loading, caching, etc.  Middleware is defined using the "use" method:
 
 ```scala
-// TODO
+class Restricted extends DefaultRouter {
+  // check password
+  use("/secret/*") { req =>
+    req?"password"|"WRONG" match {
+      case "superSecret" => req.next
+      case _ => ERR("Access Denied!!!").toFuture
+    }
+  }
+  
+  get("/secret/stuff") {
+    OK("Shh! Don't tell anybody!").toFuture
+  }
+  
+}
 ```
+
+Any request to a uri of the form "/secret/*" will first be dispatched to the "check password" middleware.
 
 ## URI Patterns
 
@@ -114,11 +129,14 @@ All handlers are bound to a URI pattern.  URI patterns may contain parameter nam
 static.  For example:
 
 ```scala
-  get("/shoe/:brand/:size") { req => ... } // URI pattern with two parameters.  Matches: "GET /shoe/nike/11" and "GET /shoe/adidas/12"
+  // URI pattern with two parameters.  Matches: "GET /shoe/nike/11" and "GET /shoe/adidas/12"
+  get("/shoe/:brand/:size") { req => ... } 
 
-  get("/dog/*") { req => ... }  // URI pattern with a wildcard. Matches: "GET /dog/fido" and "GET /dog/rex"
+  // URI pattern with a wildcard. Matches: "GET /dog/fido" and "GET /dog/rex"
+  get("/dog/*") { req => ... }  
 
-  get("/me/a/cup/of/coffee") { req => ... } // Static URI. Matchs ONLY "GET /me/a/cup/of/coffee"
+  // Static URI. Matchs ONLY "GET /me/a/cup/of/coffee"  
+  get("/me/a/cup/of/coffee") { req => ... } 
 ```
 
 ### Parameters
