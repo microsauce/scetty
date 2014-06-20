@@ -384,6 +384,14 @@ trait Router extends BaseRouter {
     new Response(HttpResponseStatus.INTERNAL_SERVER_ERROR/*500*/,bytes,contentType)
   }
 
+  def FORBIDDEN(str:String):Response = {
+    NOT_FOUND(str,"text/html")
+  }
+
+  def FORBIDDEN(str:String,contentType:String) = {
+    new Response(HttpResponseStatus.FORBIDDEN/*403*/,str,contentType)
+  }
+
   def NOT_FOUND(str:String):Response = {
     NOT_FOUND(str,"text/html")
   }

@@ -109,12 +109,12 @@ class Restricted extends DefaultRouter {
   // check password
   use("/secret/*") { req =>
     req?"password"|"WRONG" match {
-      case "superSecret" => req.next
-      case _ => ERR("Access Denied!!!").toFuture
+      case "super secret" => req.next
+      case _ => FORBIDDEN("Access Denied!!!").toFuture
     }
   }
   
-  get("/secret/stuff") {
+  get("/secret/stuff") { req =>
     OK("Shh! Don't tell anybody!").toFuture
   }
   
@@ -232,7 +232,7 @@ get("/*") { req =>
 
 ```
 
-The pipe operator in this context is equivalent to the method "getOrElse".
+The pipe operator in this context is equivalent to "getOrElse".
 
 ## Session
 
@@ -240,9 +240,9 @@ TODO the session api is not yet finalized
 
 # Futures
 
-You may recall that handlers must have a return type of Future[Response].  Thus far we have used the .toFuture method
-to create and return a completed Future.  If, however, your handler uses the 'future' construct or makes use of libraries
-that return Futures you can do the following:
+You may recall that handlers must have a return type of Future\[Response\].  Thus far we have used the .toFuture method
+to create and return a completed Future.  If, however, your handler uses the 'future' construct (example 1) or makes use 
+of libraries that return Futures (example 2) you can do the following:
 
 ```scala
   // example 1: future construct
@@ -256,9 +256,11 @@ that return Futures you can do the following:
   get("/data") { req =>
     val futureData:Future[Data] = getFutureData() 
     for ( data <- futureData ) 
-      yield OK(render("/data/template.jade", Map("data"->data))) // this for comprehension yields a Future[Response] 
+      yield OK(render("/data/template.jade", Map("data"->data))) // yield a response from within a Future 
   }
 ```
+
+
 
 # Json
 
