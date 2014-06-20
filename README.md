@@ -206,7 +206,7 @@ sess:Map\[String,Array\[Byte\]\] - the session attribute map (Note: the session 
 
 error:Throwable - this variable contains an exception thrown from a handler 
 
-## Operators (/ & ? ^^) and apply
+## Operators
 
 def / (paramName:String):String - retrieve a URI parameter from the request 
 
@@ -214,7 +214,7 @@ def &amp; (paramName:String):Option\[String\] - retrieve a form parameter from t
 
 def ? (paramName:String):Option\[String\] - retrieve a query string parameter from the request
  
-def ^^ (paramName:String):Option\[ByteBuf\] - retrieve multipart form data as a ByteBuf (for a file update, for example) 
+def ^^ (paramName:String):Option\[ByteBuf\] - retrieve multi-part form data as a ByteBuf (a file upload, for example) 
 
 ## Monkey Patches
 
@@ -259,8 +259,6 @@ of libraries that return Futures (example 2) you can do the following:
       yield OK(render("/data/template.jade", Map("data"->data))) // yield a response from within a Future 
   }
 ```
-
-
 
 # Json
 
@@ -309,11 +307,14 @@ class CookieEnablingRouter extends DefaultRouter {
   . . .
   
   get("/") { req =>
-    val cookieData = req.cookies("myCookie")
+    val myCookie = req.cookies("myCookie")
     . . .
   }
 }
 ```
+
+When using the cookieSupport middleware cookies are decoded from the request header and added to the request cookies
+map, they are accessible by name.
 
 # Router trait
 
