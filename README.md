@@ -338,14 +338,22 @@ Cookie support can be added to a Scetty application by adding cookieSupport midd
 
 ```scala
 import org.microsauce.scetty.Router._
+import io.netty.handler.codec.http.DefaultCookie
 . . .
 class CookieEnablingRouter extends DefaultRouter {
   use(cookieSupport)
   . . .
   
   get("/") { req =>
+    // retrieve a cookie from the request
     val myCookie = req.cookies("myCookie")
+    
     . . .
+    
+    // send a cookie in the response
+    OK("let's send a cookie")
+      .cookie(new DefaultCookie("key","value")) 
+      .toFuture
   }
 }
 ```
