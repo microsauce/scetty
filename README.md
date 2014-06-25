@@ -15,7 +15,6 @@ The Scetty API was inspired by Twitter's Finatra, Express.js, and a tip-of-the-h
 * Pre-defined middleware: Cookie Support, Session Support
 * Scalate template integration
 * SSL Support
-* Uri, query string, and form parameter maps
 
 ## Glossary of Terms
 
