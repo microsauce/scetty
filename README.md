@@ -105,7 +105,7 @@ authentication, data loading, caching, etc.  Middleware is defined with the "use
 
 ```scala
 class Restricted extends DefaultRouter {
-  // check password
+  // check password middleware
   use("/secret/*") { req =>
     req?"password"|"WRONG" match {
       case "super secret" => req.next
@@ -129,11 +129,14 @@ All handlers are bound to a URI pattern.  URI patterns may contain parameter nam
 static.  For example:
 
 ```scala
-  // URI pattern with two parameters (brand & size).  Matches: "GET /shoe/nike/11" and "GET /shoe/adidas/12"
+  // URI pattern with two parameters (brand & size).  Matches: "GET /shoe/nike/11" and "GET /shoe/adidas/12" for example
   get("/shoe/:brand/:size") { req => ... } 
 
-  // URI pattern with a wildcard. Matches: "GET /dog/fido" and "GET /dog/rex"
-  get("/dog/*") { req => ... }  
+  // URI pattern with a wildcard. Matches: "GET /dog/fido" and "GET /dog/rex" for example
+  get("/dog/*") { req => ... }
+    
+  // URI pattern with a wildcard. Matches: "GET /cat/fish/Mittens/tweetybirds" for example
+  get("/cat/*/:name/*") { req => ... }  
 
   // Static URI. Matches ONLY "GET /me/a/cup/of/coffee"  
   get("/me/a/cup/of/coffee") { req => ... } 
@@ -141,7 +144,7 @@ static.  For example:
 
 ### Parameters
 
-Parameters are easily extracted from the request, for example:
+Parameters are easily extracted from the request uri, for example:
 
 ```scala
   get("/auto/:make/:model") { req =>
