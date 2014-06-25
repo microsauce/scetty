@@ -224,7 +224,7 @@ def uri:String - return the request uri (excluding the query string)
 
 def apply\[T\](attrName:String):T - retrieve an attribute from the request as an instance of the given type
 ```scala
-  req[MyData]("myData")
+  val myData = req[MyData]("myData")
 ```  
  
 def update(attrName:String,value:Any) - set the value of a request attribute
