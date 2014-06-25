@@ -19,7 +19,7 @@ The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-
 
 ## Glossary of Terms
 
-**Handler**: a function of type Request=>Future[Response] dispatched to service an HTTP request
+**Handler**: a function of type Request=>Future\[Response\] dispatched to service an HTTP request
 
 **Middleware**: a handler that performs an intermediate task, defined via the 'use' method
 
@@ -194,11 +194,12 @@ Alternatively you may instantiate your own response object as follows:
 
 ```scala
   get("/my/response") { req =>
+    // Response:(HttpResponseStatus/*status*/,Any/*source*/,String/*contentType*/)
     new Response(HttpResponseStatus.200,"My Response","text/plain").toFuture
   }
 ```
 
-The second argument in the Response constructor is the content source object.  This value may be a String, File, ByteBuf, or
+The second parameter to the Response constructor is the content source object.  This value may be a String, File, ByteBuf, or
 Array\[Byte\].
 
 # Request
