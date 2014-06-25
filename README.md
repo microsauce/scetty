@@ -5,7 +5,7 @@ A simple library for writing Netty HTTP servers in Scala.
 
 ## Introduction
 
-The Scetty API was inspired by Twitter's Finatra, Express.js, with a tip-of-the-hat to the Play framework too.
+The Scetty API was inspired by Twitter's Finatra, Express.js, and a tip-of-the-hat to the Play framework too.
 
 ## Features:
 * Build fully asynchronous servers using Netty and Scala Futures
