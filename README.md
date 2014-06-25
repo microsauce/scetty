@@ -359,19 +359,18 @@ class CookieEnablingRouter extends DefaultRouter {
 ```
 
 When using the cookieSupport middleware cookies are decoded from the request header and added to the request cookies
-map, they are accessible by name.
+map and encoded and sent in the response, they are accessible by name.  
 
 # Router trait
 
 Thus far we have extended DefaultRouter in our router definitions.  DefaultRouter provides sensible defaults for two 
 Router values: documentRoot:String and templateRoot:String.
 
-documentRoot: determines the root folder from which this Router will load static resources (files).
+**documentRoot**: determines the root folder from which this Router will load static resources (files).
 
-templateRoot: determines the root folder from which this Router will load templates.
+**templateRoot**: determines the root folder from which this Router will load templates.
 
-If these default values are insufficient you may extend the Router trait directly and initialize and initialize
-them yourself:
+If these default values are insufficient you may extend the Router trait directly and initialize them yourself:
   
 ```scala
 class MyRouter(val documentRoot:String,val templateRoot:String) extends Router {
