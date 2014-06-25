@@ -102,7 +102,7 @@ error handler is defined the same way as any other GET handler, but it must have
 ## More on Middleware
 
 Middleware can be used to parse and/or decorate the request or it can be used to handle cross-cutting concerns like logging,
-authentication, data loading, caching, etc.  Middleware is defined using the "use" method:
+authentication, data loading, caching, etc.  Middleware is defined with the "use" method:
 
 ```scala
 class Restricted extends DefaultRouter {
@@ -162,8 +162,8 @@ Wildcard values may also be extracted from the request:
 ```scala
   get("/fish/*/quantity/*") { req =>
     // wildcard indices are zero-based
-    val firstWildcard = req/"*_0"  // get the wildcard vale at index 0 with parameter name "*_0"
-    val secondWildcard = req/"*_1" // get the wildcard vale at index 1 with parameter name "*_1"
+    val firstWildcard = req/"*_0"  // get the wildcard value at index 0 with parameter name "*_0"
+    val secondWildcard = req/"*_1" // get the wildcard value at index 1 with parameter name "*_1"
     ...
   }
 ```
