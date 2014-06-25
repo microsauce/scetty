@@ -215,45 +215,45 @@ wealth of additional functionality.
 
 ## Additional Methods
 
-def json\[T\]:T - de-serialize the (Json) request body and return an object of the given type
+**def json\[T\]:T** - de-serialize the (Json) request body and return an object of the given type
  
-def bodyString:String - return the request body content as a String
+**def bodyString:String** - return the request body content as a String
 
-def contentType:String - return the request content type
+**def contentType:String** - return the request content type
 
-def method:String - return the request method
+**def method:String** - return the request method
 
-def uri:String - return the request uri (excluding the query string)
+**def uri:String** - return the request uri (excluding the query string)
 
-def apply\[T\](attrName:String):T - retrieve an attribute from the request as an instance of the given type
+**def apply\[T\](attrName:String):T** - retrieve an attribute from the request as an instance of the given type
 ```scala
   val myData = req[MyData]("myData")
 ```  
  
-def update(attrName:String,value:Any) - set the value of a request attribute
+**def update(attrName:String,value:Any)** - set the value of a request attribute
 ```scala
   req("myData") = myData
 ```
 
-def next:Future\[Response\] - execute the next handler in the route
+**def next:Future\[Response\]** - execute the next handler in the route
 
 ## Additional Values/Variables
 
-cookies : Map\[String,String\] - the request cookie map - available only when cookieSupport is in use 
+**cookies : Map\[String,String\]** - the request cookie map - available only when cookieSupport is in use 
 
-sess : Map\[String,Array\[Byte\]\] - the session attribute map (Note: the session API is not yet final) 
+**sess : Map\[String,Array\[Byte\]\]** - the session attribute map (Note: the session API is not yet final) 
 
-error : Throwable - this variable contains an exception thrown from a handler 
+**error : Throwable** - this variable contains an exception thrown from a handler 
 
 ## Operators
 
-def / : (paramName:String):String - retrieve a URI parameter from the request 
+**def / : (paramName:String):String** - retrieve a URI parameter from the request 
 
-def &amp; (paramName:String):Option\[String\] - retrieve a form parameter from the request 
+**def &amp; (paramName:String):Option\[String\]** - retrieve a form parameter from the request 
 
-def ? (paramName:String):Option\[String\] - retrieve a query string parameter from the request
+**def ? (paramName:String):Option\[String\]** - retrieve a query string parameter from the request
  
-def ^^ (paramName:String):Option\[ByteBuf\] - retrieve multi-part form data as a ByteBuf (a file upload, for example) 
+**def ^^ (paramName:String):Option\[ByteBuf\]** - retrieve multi-part form data as a ByteBuf (a file upload, for example) 
 
 ## Monkey Patches
 
