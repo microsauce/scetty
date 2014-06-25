@@ -90,7 +90,7 @@ attempt to read it from the file system.
 
 ## Error Handler
 
-If any of your request handlers fail to handle their own exception control is passed to the default error handler.  The default 
+If any of your request handlers fail to handle their own exceptions control is passed to the default error handler.  The default 
 error handler is defined the same way as any other GET handler, but it must have a uri pattern of "/error":
 
 ```scala
@@ -121,7 +121,8 @@ class Restricted extends DefaultRouter {
 }
 ```
 
-Any request to a uri of the form "/secret/*" will first be dispatched to the "check password" middleware.
+Any request to a uri of the form "/secret/*" will first be dispatched to the "check password" middleware.  When the correct
+password is given the next handler in the route (req.next) is called, otherwise an error is given. 
 
 ## URI Patterns
 
@@ -129,19 +130,19 @@ All handlers are bound to a URI pattern.  URI patterns may contain parameter nam
 static.  For example:
 
 ```scala
-  // URI pattern with two parameters.  Matches: "GET /shoe/nike/11" and "GET /shoe/adidas/12"
+  // URI pattern with two parameters (brand & size).  Matches: "GET /shoe/nike/11" and "GET /shoe/adidas/12"
   get("/shoe/:brand/:size") { req => ... } 
 
   // URI pattern with a wildcard. Matches: "GET /dog/fido" and "GET /dog/rex"
   get("/dog/*") { req => ... }  
 
-  // Static URI. Matchs ONLY "GET /me/a/cup/of/coffee"  
+  // Static URI. Matches ONLY "GET /me/a/cup/of/coffee"  
   get("/me/a/cup/of/coffee") { req => ... } 
 ```
 
 ### Parameters
 
-Parameters can be extracted from request URI's, for example:
+Parameters are easily extracted from the request, for example:
 
 ```scala
   get("/auto/:make/:model") { req =>
@@ -161,16 +162,15 @@ Wildcard values may also be extracted from the request:
 ```scala
   get("/fish/*/quantity/*") { req =>
     // wildcard indices are zero-based
-    val firstWildcard = req/"*_0"  // get the wildcard at index 0 with parameter name "*_0"
-    val secondWildcard = req/"*_1"
+    val firstWildcard = req/"*_0"  // get the wildcard vale at index 0 with parameter name "*_0"
+    val secondWildcard = req/"*_1" // get the wildcard vale at index 1 with parameter name "*_1"
     ...
   }
 ```
 
-
 # Request
 
-The Scetty Request wraps a Netty FullHttpRequest object and exposes all of its methods 
+The Scetty Request class wraps a Netty FullHttpRequest object and exposes all of its methods 
 (see [FullHttpRequest](http://netty.io/4.0/api/io/netty/handler/codec/http/FullHttpRequest.html)).  It also provides a 
 wealth of additional functionality.
 
@@ -200,15 +200,15 @@ def next:Future\[Response\] - execute the next handler in the route
 
 ## Additional Values/Variables
 
-cookies:Map\[String,String\] - the request cookie map - available only when cookieSupport is in use 
+cookies : Map\[String,String\] - the request cookie map - available only when cookieSupport is in use 
 
-sess:Map\[String,Array\[Byte\]\] - the session attribute map (Note: the session API is not yet final) 
+sess : Map\[String,Array\[Byte\]\] - the session attribute map (Note: the session API is not yet final) 
 
-error:Throwable - this variable contains an exception thrown from a handler 
+error : Throwable - this variable contains an exception thrown from a handler 
 
 ## Operators
 
-def / (paramName:String):String - retrieve a URI parameter from the request 
+def / : (paramName:String):String - retrieve a URI parameter from the request 
 
 def &amp; (paramName:String):Option\[String\] - retrieve a form parameter from the request 
 
@@ -218,7 +218,7 @@ def ^^ (paramName:String):Option\[ByteBuf\] - retrieve multi-part form data as a
 
 ## Monkey Patches
 
-To provide a terse programming DSL an implicit class is defined to augment Option:
+To provide a terse programming DSL an implicit class is defined to augment Option with a pipe operator:
 
 ```scala
 import org.microsauce.scetty.Router._
@@ -232,7 +232,7 @@ get("/*") { req =>
 
 ```
 
-The pipe operator in this context is equivalent to "getOrElse".
+"|" in this context is equivalent to "getOrElse".
 
 ## Session
 
@@ -270,7 +270,8 @@ Json data is easily de-serialized from the request:
   . . .
 
   post("/my/data") { req =>
-    val myData = req.json[MyData] 
+    val myData = req.json\[MyData\]
+    . . . 
   }
 ```
 
@@ -350,3 +351,5 @@ object HelloWorld extends SimpleScettyApp {
   start
 }
 ```
+
+# More to Come . . .
