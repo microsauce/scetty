@@ -173,6 +173,8 @@ Wildcard values may also be extracted from the request:
 The Router trait has four overloaded Response methods: OK (200), ERR (500), NOT_FOUND (404), and FORBIDDEN (403).  
 
 ```scala
+  import org.microsauce.scetty.Router._
+
   get("/divide/:dividend/:divisor") { req =>
     try {
       val dividend = (req"dividend").toFloat   
@@ -181,12 +183,13 @@ The Router trait has four overloaded Response methods: OK (200), ERR (500), NOT_
     } catch {
       case e: NumberFormatException => ERR(s"Bad input ${req/"dividend"} - ${req/"divisor"}").toFuture
       case e: ArithmeticException => ERR(s"Check your numbers: ${e.getMessage}", "text/plain").toFuture
-      case e: Throwable => ERR(new File("")).toFuture 
+      case e: Throwable => ERR(new File(documentRoot+"/unknown_error.txt")).toFuture 
+        // FYI - documentRoot requires import org.microsauce.scetty.Router._
     }
   }
 ```
 
-By default all strings passed to the response methods have content type of "text/html", all binary data is sent as 
+By default all strings passed to these response methods have content type of "text/html", all binary data is sent as 
 "application/octet-stream", and json objects as "application/json".  When sending a file Scetty chooses a content type 
 based on the file extension (via MimeTable).
 

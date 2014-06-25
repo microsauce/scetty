@@ -216,8 +216,8 @@ trait Router extends BaseRouter {
   import scala.concurrent._
   import UriUtils._
 
-  protected val documentRoot:String
-  protected val templateRoot:String
+  val documentRoot:String
+  val templateRoot:String
 
   protected override val uriHandlers = scala.collection.mutable.ListBuffer[/*Handler*/HttpRequestHandler]()
   lazy protected val templateFolder = new File(templateRoot)
