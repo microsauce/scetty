@@ -87,10 +87,17 @@ object HttpRouteMiddlewareRequestHandler {
       case _ => GET // default
     }
 
-    val route = getRoute(verb, request.getUri,false)
+    val route = getRoute(verb, uriPath(request.getUri),false)
 
     val tryFutureResponse = execRoute(new Request(verb, request, route, dataFactory))
     sendHttpResponse(verb,tryFutureResponse,ctx,request)
+  }
+
+  // TODO duplicates code in Request.uri
+  private def uriPath(nettyUri:String) = {
+    val qndx = nettyUri.lastIndexOf("?")
+    if ( qndx < 0 ) nettyUri
+    else nettyUri.substring(0,qndx)
   }
 
   private def sendHttpResponse(verb:HttpVerb, tryFutureResponse:Try[Future[Response]],ctx:ChannelHandlerContext,request:FullHttpRequest) {
