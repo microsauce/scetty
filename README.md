@@ -309,7 +309,7 @@ Json data is easily de-serialized from the request:
   . . .
 
   post("/my/data") { req =>
-    val myData = req.json\[MyData\]
+    val myData = req.json[MyData]
     . . . 
   }
 ```
