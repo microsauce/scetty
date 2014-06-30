@@ -381,6 +381,35 @@ class MyRouter(val documentRoot:String,val templateRoot:String) extends Router {
 val myRouterInstance = new MyRouter("/my/document/root","/my/template/root")
 ```
 
+# Scetty
+
+The Scetty class is a Netty server builder.  It encapsulates the Netty bootstrap and channel initializer and has many methods
+you can use to configure your server:
+
+```scala
+    new Scetty()
+    
+      // commonly used methods
+      .address("192.168.0.1")         // default: "localhost"
+      .port(80)                       // default: 80
+      .router(<Router instance>)
+      
+      // ssl methods
+      .ssl(true)                      // default: false
+      .keystore("/path/to/keystore")
+      .keypass("password")
+          
+      // less commonly used methods
+      .maxInitialLineLength(4096)   // default: 4096 (bytes)
+      .maxHeaderSize(8192)          // default: 8192 (bytes)
+      .maxContentLength(65536)      // default: 65536 (bytes)
+      .maxChunkSize(8192)           // default: 8192 (bytes)
+      // substitute your own channel initializer - add HttpRouteMiddlewareRequestHandler to enable routing
+      .channelInit(<ChannelInitializer[SocketChannel] instance>) 
+      
+      .start
+```
+
 # SimpleScettyApp
 
 To simplify the creation of Scetty servers you can alternatively extend the SimpleScettyApp trait: 
