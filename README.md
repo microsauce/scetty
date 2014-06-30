@@ -33,7 +33,7 @@ For starters you must define one or more routers and register them with a Scetty
 ```scala
 class HelloWorld extends DefaultRouter {
   // hello handler
-  get("/hello/:name") { 
+  get("/hello/:name") { req => 
     OK(s"Hello ${req/"name"}").toFuture
   }
 }
