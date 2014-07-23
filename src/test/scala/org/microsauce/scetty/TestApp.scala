@@ -100,7 +100,7 @@ println(s"the json payload: $contentAsString")
     post("/post/data2") { req =>
       println("POST DATA 2")      
       val name = req&"name"|"Jimbo Jones"
-      val age = req&"age"|"19"
+      val age = req&"age"|"20"
       OK(s"post data: $name - age: $age").toFuture
     }
     

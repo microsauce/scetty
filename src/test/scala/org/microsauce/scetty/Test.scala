@@ -1,5 +1,7 @@
 package org.microsauce.scetty
 
+import org.microsauce.scetty.Router._
+
 /**
  * Created by jboone on 6/10/2014.
  */
@@ -20,6 +22,18 @@ object Test extends SimpleScettyApp {
     OK(json(allMyDogs)).toFuture
   }
 
+  use("/secret/*") { req =>
+    req?"password"|"WRONG" match {
+      case "supersecret" => req.next
+      case _ => FORBIDDEN("Access Denied!!!").toFuture
+    }
+  }
+
+  get("/secret/stuff") { req =>
+    OK("Shh! Don't tell anybody!").toFuture
+  }
+
   start
 }
+
 

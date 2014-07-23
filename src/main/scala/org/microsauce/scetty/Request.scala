@@ -189,8 +189,7 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
   def uri = {
     val fullUri = req.getUri
     val qndx = fullUri.lastIndexOf("?")
-    if ( qndx < 0 )
-      fullUri
+    if ( qndx < 0 ) fullUri
     else fullUri.substring(0,qndx)
   }
 
