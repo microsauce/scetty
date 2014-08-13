@@ -198,7 +198,7 @@ object Router {
   }
 
   implicit class StackTraceString(t:Throwable) {
-    def stackTrace = {
+    def stackTrace:String = {
       val stringWriter = new StringWriter()
       val printWriter = new PrintWriter(stringWriter)
       t.printStackTrace(printWriter)

@@ -28,6 +28,9 @@ local.properties
 # PDT-specific
 .buildpath
 
+.gradle/
+.idea/
+
 
 #################
 ## Visual Studio
@@ -169,6 +172,8 @@ App_Data/*.ldf
 ## Windows detritus
 #############
 
+.gitignore
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -181,6 +186,16 @@ $RECYCLE.BIN/
 
 # Mac crap
 .DS_Store
+
+#########
+# Idea
+#########
+.idea/
+
+##########
+# Gradle
+##########
+.gradle/
 
 
 #############

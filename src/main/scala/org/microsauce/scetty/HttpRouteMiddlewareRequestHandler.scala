@@ -78,7 +78,10 @@ object HttpRouteMiddlewareRequestHandler {
     else assembledRoute += new HttpRequestHandler(GET,new UriPattern("*","""/.*""".r, List()),fileNotFound)
   }
 
-  override def channelRead0(ctx: ChannelHandlerContext, /*message:Any*/request: FullHttpRequest) {
+  override def channelRead0(ctx: ChannelHandlerContext, /*message:Any*/request: FullHttpRequest):Unit =
+    doChannelRead0(ctx,request,null)
+
+  private def doChannelRead0(ctx: ChannelHandlerContext, /*message:Any*/request: FullHttpRequest, error:Throwable): Unit = {
     val verb = request.getMethod.toString match {
       case "GET" => GET
       case "POST" => POST
@@ -87,54 +90,45 @@ object HttpRouteMiddlewareRequestHandler {
       case _ => GET // default
     }
 
-    val route = getRoute(verb, uriPath(request.getUri),false)
-
-    val tryFutureResponse = execRoute(new Request(verb, request, route, dataFactory))
-    sendHttpResponse(verb,tryFutureResponse,ctx,request)
+    execRoute(
+      new Request(
+        verb,
+        request,  
+        getRoute(verb, uriPath(request.getUri),false),
+        dataFactory,
+        error)
+    ) match {
+      case Success(futureResponse) => for ( response <- futureResponse ) {
+        writeResponse(ctx,response)
+      }
+      case Failure(err) =>
+        logger.severe(err.toString); err.printStackTrace()
+        val errorRequest = request.copy()
+        errorRequest.setMethod(io.netty.handler.codec.http.HttpMethod.GET); errorRequest.setUri("/error")
+        try {
+          doChannelRead0(ctx, errorRequest, err) // forward to error page
+        } catch {
+          case fwdErr:Throwable =>
+            import org.microsauce.scetty.Router._
+            val res = new Response(
+              HttpResponseStatus.INTERNAL_SERVER_ERROR,
+              s"internal server error: ${err.getMessage()} - ${err.stackTrace}\n\nForward error: ${fwdErr.getMessage()} - ${fwdErr.stackTrace}",
+              "text/plain")
+            writeResponse(ctx,res)
+        }
+    }
   }
 
   // TODO duplicates code in Request.uri
-  private def uriPath(nettyUri:String) = {
+  private def uriPath(nettyUri:String):String = {
     val qndx = nettyUri.lastIndexOf("?")
     if ( qndx < 0 ) nettyUri
     else nettyUri.substring(0,qndx)
   }
 
-  private def sendHttpResponse(verb:HttpVerb, tryFutureResponse:Try[Future[Response]],ctx:ChannelHandlerContext,request:FullHttpRequest) {
-    tryFutureResponse match {
-      case Success(futureResponse) => for ( response <- futureResponse ) {
-        writeResponse(ctx,response)
-      }
-      case Failure(err) =>
-        import org.microsauce.scetty.Router._
-//        val error = new Error(err)
-        logger.severe(err.toString)
-        err.printStackTrace()
-        val errorRoute = getRoute(GET,"/error",true)
-        val errorRequest = new Request(verb, request, errorRoute, dataFactory)
-        //errorRequest("_error") = error
-        errorRequest.error = err
-        val res = new Response(HttpResponseStatus.INTERNAL_SERVER_ERROR, s"internal server error: ${err.getMessage} - ${err.stackTrace}","text/plain")
-        if ( errorRoute.size > 0 ) {
-          val errorTryFutureResponse = execRoute(errorRequest)
-          errorTryFutureResponse match {
-            case Success(futureErrorResponse) => for (errorResponse <- futureErrorResponse) {
-              writeResponse(ctx,errorResponse)
-            }
-            case Failure(errFail) =>
-              logger.severe("Error occurred while rendering the error page")
-              errFail.printStackTrace
-              writeResponse(ctx,res)
-          }
-        } else {
-          writeResponse(ctx,res)
-        }
-    }
-  }
-
   private def writeResponse(ctx:ChannelHandlerContext,response:Response)= {
-      ctx.write(response.nettyResponse)
-      ctx.writeAndFlush(response.nettySource).addListener(closeChannel)
+    ctx.write(response.nettyResponse)
+    ctx.writeAndFlush(response.nettySource).addListener(closeChannel)
   }
 
 }

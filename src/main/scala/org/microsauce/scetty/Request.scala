@@ -19,7 +19,7 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
  * - next method - execute the next handler in the route
  *
  */
-class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[HttpRequestHandler],val dataFactory:DefaultHttpDataFactory) {
+class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[HttpRequestHandler],val dataFactory:DefaultHttpDataFactory,val error:Throwable) {
 
   import UriUtils._
   import io.netty.handler.codec.http.HttpHeaders.Names._
@@ -30,7 +30,7 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
   implicit val formats = Serialization.formats(NoTypeHints)
 
   // TODO implicit class to add stackTrace:Unit=>String method to Throwable
-  var error:Throwable = null
+//  var error:Throwable = null
 
   private val queryStringDecoder = new QueryStringDecoder(req.getUri)
   private var uriParameters:Map[String,String] = null
@@ -120,7 +120,7 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
    * @see  <a href="http://netty.io/5.0/api/io/netty/handler/codec/http/FullHttpRequest.html#copy()">netty.io</a>
    * @return
    */
-  def copy:Request = new Request(verb, req.copy, route, dataFactory)
+  def copy:Request = new Request(verb, req.copy, route, dataFactory, this.error)
 
   /**
    * @see <a href="http://netty.io/5.0/api/io/netty/handler/codec/http/FullHttpRequest.html#duplicate()">netty.io</a>
@@ -150,13 +150,13 @@ class Request(val verb:HttpVerb, val req:FullHttpRequest,val route: ListBuffer[H
    * @see <a href="http://netty.io/5.0/api/io/netty/util/ReferenceCounted.html#retain()">netty.io</a>
    * @return
    */
-  def retain:Request = new Request(verb, req.retain, route, dataFactory)
+  def retain:Request = new Request(verb, req.retain, route, dataFactory, this.error)
 
   /**
    * @see <a href="http://netty.io/5.0/api/io/netty/util/ReferenceCounted.html#retain(int)">netty.io</a>
    * @return
    */
-  def retain(decrement:Int):Request = new Request(verb, req.retain(decrement), route, dataFactory)
+  def retain(decrement:Int):Request = new Request(verb, req.retain(decrement), route, dataFactory, this.error)
 
   /**
    * @see <a href="http://netty.io/5.0/api/io/netty/handler/codec/http/LastHttpContent.html#trailingHeaders()">netty.io</a>
