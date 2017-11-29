@@ -1,17 +1,13 @@
 package org.microsauce.scetty
 
-//import io.netty.handler.codec.http.DefaultHttpResponse
-import io.netty.buffer.ByteBuf
+import java.io.{File, RandomAccessFile}
+
+import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.DefaultFileRegion
-import java.io.RandomAccessFile
-import io.netty.buffer.Unpooled
-import io.netty.handler.codec.http.HttpResponseStatus
-import io.netty.handler.codec.http.Cookie
-import java.io.File
-import scala.concurrent.Future
+import io.netty.handler.codec.http.{Cookie, DefaultHttpResponse, HttpResponseStatus}
 import org.apache.commons.codec.Charsets
-import io.netty.handler.codec.http.DefaultHttpResponse
-import io.netty.handler.codec.http.websocketx.WebSocketFrame
+
+import scala.concurrent.Future
 
 /**
  * This class models an HTTP response.
@@ -24,10 +20,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame
 class Response(val status:HttpResponseStatus, val source:Any, val contentType:String) {
 
   import io.netty.handler.codec.http.HttpHeaders.Names._
-  import io.netty.handler.codec.http.HttpHeaders._
-  import io.netty.handler.codec.http.HttpResponseStatus._
   import io.netty.handler.codec.http.HttpVersion._
-  import scala.concurrent.Promise
 
   private val _cookies = scala.collection.mutable.Map[String,Cookie]()
 

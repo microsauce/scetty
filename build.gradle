@@ -9,32 +9,28 @@ repositories {
 }
 
 dependencies {
-  compile 'io.netty:netty-all:4.0.13.Final'
-  compile 'org.fusesource.scalate:scalate-core_2.10:1.6.1'
+  compile 'io.netty:netty-all:4.0.53.Final'
+  compile 'org.scalatra.scalate:scalate-core_2.12:1.8.0'
   compile 'commons-codec:commons-codec:1.8'
-  compile 'org.json4s:json4s-jackson_2.10:3.2.6'
-  compile 'org.scala-lang:scala-pickling_2.10:0.8.0'
-  compile 'org.scala-lang:scala-library:2.10.2'
+  compile 'org.json4s:json4s-jackson_2.12:3.6.0-M1'
+  compile 'org.scala-lang:scala-library:2.12.4'
   compile 'org.apache.logging.log4j:log4j-api:2.0-beta9'
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.scalactic:scalactic_2.12:3.0.4'
+  testCompile 'org.scalatest:scalatest_2.12:3.0.4'
+  testCompile 'org.scalaj:scalaj-http_2.12:2.3.0'
 }
 
-//dependencies {
-//    compile 'io.netty:netty-all:4.0.13.Final'
-//    compile 'org.fusesource.scalate:scalate-core_2.10:1.6.1'
-//    compile 'commons-codec:commons-codec:1.8'
-//    compile 'org.json4s:json4s-jackson_2.10:3.2.10'
-//    compile 'org.scala-lang:scala-pickling_2.11:0.8.0'
-//    compile 'org.scala-lang:scala-library:2.11.1'
-//    compile 'org.apache.logging.log4j:log4j-api:2.0-beta9'
-//}
-
-
-tasks.withType(ScalaCompile) {
-  scalaCompileOptions.useAnt = false
+task spec(dependsOn: ['testClasses'], type: JavaExec) {
+  main = 'org.scalatest.tools.Runner'
+  args = ['-R', 'build/classes/scala/test', '-oDF']
+  classpath = sourceSets.test.runtimeClasspath
+//  jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
 }
 
 task runTest(type: JavaExec, dependsOn: classes) {
-  main = 'org.microsauce.scetty.TaskLauncher'
+  main = 'org.microsauce.scetty.playground.TestTestApp'
   classpath sourceSets.main.runtimeClasspath
   classpath sourceSets.test.runtimeClasspath
   classpath configurations.runtime

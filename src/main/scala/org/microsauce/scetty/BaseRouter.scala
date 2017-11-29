@@ -1,9 +1,7 @@
 package org.microsauce.scetty
 
-/**
- * Created by jboone on 3/15/14.
- */
 trait BaseRouter {
+
   import UriUtils._
   import scala.concurrent._
 
@@ -14,16 +12,19 @@ trait BaseRouter {
   }
 
   def getRoute(verb: HttpVerb, uri: String) = {
-    uriHandlers.filter { handler => if (
-        (verb == handler.verb || handler.verb.verb == "use") &&
-          handler.uriPattern.regex.pattern.matcher(uri).matches
-      ) true else false
+    uriHandlers.filter { handler =>
+      requestMatchesHandler(verb, uri, handler)
     }
   }
 
   protected def addHandler(verb: HttpVerb, uriString: String, handler: Request => Future[Response]) {
     val uriPattern = parseUriString(uriString)
     uriHandlers += new HttpRequestHandler(verb, uriPattern, handler)
+  }
+
+  private def requestMatchesHandler(verb: HttpVerb, uri: String, handler: Handler):Boolean = {
+    (verb == handler.verb || handler.verb.name == USE.name) &&
+      handler.uriPattern.regex.pattern.matcher(uri).matches
   }
 
 }

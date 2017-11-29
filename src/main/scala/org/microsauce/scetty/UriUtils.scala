@@ -1,6 +1,7 @@
 package org.microsauce.scetty
 
 import scala.util.matching.Regex
+import scala.util.matching.Regex.Match
 
 /**
  * This class encapsulates a regular expression (derived from the handler uri pattern) and the
@@ -14,7 +15,6 @@ case class UriPattern(uriPatternString:String, regex: Regex, params: List[String
 object UriUtils {
 
   import scala.util.matching.Regex
-  import scala.collection.breakOut
 
   private val uriParmPattern = """(:([a-zA-Z0-9]+))|\*""".r
   private val replacementPattern = "(.+)"
@@ -38,25 +38,40 @@ object UriUtils {
    */
   def extractValues(uri: String, uriPattern: UriPattern) = {
     val keys = uriPattern.params
-    val values = (for (
-      thisMatch <- uriPattern.regex.findAllMatchIn(uri);
-      ndx <- 1 until (thisMatch.groupCount + 1);
-      value = thisMatch.group(ndx)
-    ) yield value).toList
+    val values = (
+      for (
+        thisMatch <- uriPattern.regex.findAllMatchIn(uri);
+        ndx <- 1 until (thisMatch.groupCount + 1);
+        value = thisMatch.group(ndx)
+      ) yield value
+    ).toList
+
     (keys zip values) toMap
   }
 
+  /**
+    * Parse named and wildcard identifiers from URI pattern string
+    *
+    * @param uriPattern
+    * @return
+    */
   private def identifiersInOrder(uriPattern: String) = {
     val tokens = for (
-      v <- uriParmPattern.findAllMatchIn(uriPattern);
-      token = if (v.groupCount > 1 && v.group(2) != null) v.group(2).toString else "*"
+      thisMatch <- uriParmPattern.findAllMatchIn(uriPattern);
+      token = getToken(thisMatch)
     ) yield token
+
     var ndx = -1
-    tokens.toList.map { t =>
+    tokens.toList.map { token =>
       ndx += 1
-      if (t == "*") s"*_$ndx" else t
+      if (token == "*") s"*_$ndx" else token
     }
   }
+
+  private def getToken(matcher:Match):String =
+    if (matcher.groupCount > 1 && matcher.group(2) != null)
+      matcher.group(2)
+    else "*"
 
   private def runtimePattern(uriExpression: String, currentPattern: Regex, replacementPattern: String) = {
     currentPattern.replaceAllIn(uriExpression, m =>

@@ -1,11 +1,9 @@
-package org.microsauce.scetty
+package org.microsauce.scetty.playground
 
+import org.microsauce.scetty.SimpleScettyApp
 import org.microsauce.scetty.Router._
+import org.microsauce.scetty.implicits._
 
-/**
- * Created by jboone on 6/10/2014.
- */
-case class DiggityDog(name:String,bones:Int)
 object Test extends SimpleScettyApp {
 
   get("/hello/:name") { req =>
@@ -35,5 +33,3 @@ object Test extends SimpleScettyApp {
 
   start
 }
-
-

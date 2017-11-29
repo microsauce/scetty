@@ -15,6 +15,7 @@ object MimeTable {
     val tokens = line.split(" ")
     val mimeString = tokens.head
     val fileExtensions = tokens.tail
+
     fileExtensions.foreach(map(_) = mimeString)
   }
   
@@ -32,6 +33,7 @@ object MimeTable {
   //
   // initialize the mime table
   //
+
   private val mtis = MimeTable.getClass.getClassLoader.getResourceAsStream("mime.table")
   Source.fromInputStream(mtis).getLines.foreach(add(_))
 }

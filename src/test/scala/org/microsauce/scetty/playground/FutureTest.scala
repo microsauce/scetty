@@ -1,15 +1,16 @@
-package org.microsauce.scetty
+package org.microsauce.scetty.playground
 
-/**
- * Created by jboone on 6/18/2014.
- */
+import org.microsauce.scetty.SimpleScettyApp
+
 object FutureTest extends SimpleScettyApp {
   import scala.concurrent._
   import scala.concurrent.ExecutionContext.Implicits.global
 
+  import ExecutionContext.Implicits.global
+
   case class Data(someData:String)
 
-  def getFutureData = future {
+  def getFutureData = Future {
     Thread.sleep(1000)
     new Data("here's some data")
   }
@@ -20,5 +21,11 @@ object FutureTest extends SimpleScettyApp {
       yield OK(s"here is your data: ${data.someData}")
   }
 
-  start
+  get("/some/other/data") { req =>
+    val futureData = getFutureData
+    for ( data <- futureData )
+      yield OK(s"here is your other data: ${data.someData}")
+  }
+
+  port(8080).start
 }

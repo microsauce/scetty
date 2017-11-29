@@ -30,7 +30,7 @@ local.properties
 
 .gradle/
 .idea/
-
+*.iml
 
 #################
 ## Visual Studio

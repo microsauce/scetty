@@ -4,14 +4,13 @@ import java.net.InetAddress
 import java.io.{PrintWriter, StringWriter}
 
 /**
- * Created by jboone on 2/10/14.
+ * Scetty error class.
  */
 class Error(throwable:Throwable) {
 
   val message = throwable.getMessage
   val stringWriter = new StringWriter()
   val printWriter = new PrintWriter(stringWriter)
-  throwable.printStackTrace(printWriter)
   val stackTrace = stringWriter.toString()
 
   override def toString = {

@@ -8,10 +8,10 @@ trait DefaultRouter extends Router {
   /**
    * The router document root (static resources) - [working directory]/docs
    */
-  val documentRoot = Router.docRoot
+  override val documentRoot = Router.docRoot
   
   /**
    * The router scalate template root - [working directory]/templates
    */
-  val templateRoot = Router.templateRoot
+  override val templateRoot = Router.templateRoot
 }

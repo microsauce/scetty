@@ -5,28 +5,30 @@ package org.microsauce.scetty
  */
 trait SimpleScettyApp extends App with DefaultRouter {
 
-  val scetty = new Scetty()
-  scetty.router(this)
+  val scettyContextBuilder:ScettyContextBuilder = ScettyContextBuilder.create
+  scettyContextBuilder.addRouter(this)
+//  val scetty = new Scetty()
+//  scetty.router(this)
 
-  def address(address:String) = {
-    scetty.address(address)
+  def inetAddress(address:String) = {
+    scettyContextBuilder.inetAddress(address)
     this
   }
 
   def port(port:Int) = {
-    scetty.port(port)
+    scettyContextBuilder.port(port)
     this
   }
 
   def router(router:Router) = {
-    scetty.router(router)
+    scettyContextBuilder.addRouter(router)
     this
   }
 
   def first(router:Router) = {
-    scetty.first(router)
+    scettyContextBuilder.prependRouter(router)
     this
   }
 
-  def start = scetty.start
+  def start:Unit = new Scetty(scettyContextBuilder.build).start
 }

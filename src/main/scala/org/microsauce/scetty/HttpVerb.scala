@@ -1,9 +1,12 @@
 package org.microsauce.scetty
 
-sealed trait HttpVerb {val verb:String}
-case object GET extends HttpVerb {val verb = "get"}
-case object POST extends HttpVerb {val verb = "post"}
-case object PUT extends HttpVerb {val verb = "put"}
-case object DELETE extends HttpVerb {val verb = "delete"}
-case object USE extends HttpVerb {val verb = "use"}
-case object WS extends HttpVerb {val verb = "ws"}
+// TODO doc
+
+sealed trait HttpVerb {val name:String}
+
+case object GET extends HttpVerb {val name = "GET"}
+case object POST extends HttpVerb {val name = "POST"}
+case object PUT extends HttpVerb {val name = "PUT"}
+case object DELETE extends HttpVerb {val name = "DELETE"}
+case object USE extends HttpVerb {val name = "USE"}
+case object WS extends HttpVerb {val name = "WS"}

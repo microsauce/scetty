@@ -1,12 +1,12 @@
-package org.microsauce.scetty
+package org.microsauce.scetty.playground
 
-case class Dog(val name:String, val age:Int)
+import org.microsauce.scetty.{DefaultRouter, Scetty, ScettyContextBuilder}
+import org.microsauce.scetty.Router._
+import org.microsauce.scetty.util.Error
+import org.microsauce.scetty.implicits._
 
 object HelloWorld extends DefaultRouter with App {
-  
-  import org.microsauce.scetty.Router._
-  import org.microsauce.scetty.util.Error
-  
+
   use(cookieSupport)
   use { req =>
     println(s"\n\n$req\n\n")
@@ -46,7 +46,7 @@ object HelloWorld extends DefaultRouter with App {
     println(s"request uri: ${req.getUri}")
     OK(s"<b>Hello ${req/"name"}! Love duh default netty router hoo hoo</b>").toFuture
   }
-  
+
   get("/goodbye/:name") { req =>
     println(s"request uri: ${req.getUri}")
     OK(s"<b>Bye Bye ${req/"name"}! Love duh default netty router hoo hoo</b>").toFuture
@@ -79,9 +79,10 @@ object HelloWorld extends DefaultRouter with App {
     OK(s"The grade ${req/"grade"} has earned you a ${req("reward")}").toFuture
   }
 
-  new Scetty()
-    .router(HelloWorld)
-    .address("localhost")
+  new Scetty(ScettyContextBuilder.create
+    .addRouter(HelloWorld)
+    .inetAddress("localhost")
     .port(8888)
-    .start
+    .build
+  ).start
 }
