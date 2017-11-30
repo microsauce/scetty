@@ -177,8 +177,8 @@ The Router trait has four overloaded Response methods: OK (200), ERR (500), NOT_
 ```scala
   get("/divide/:dividend/:divisor") { req =>
     try {
-      val dividend = (req"dividend").toFloat   
-      val divisor = (req"divisor").toFloat  
+      val dividend = (req/"dividend").toFloat   
+      val divisor = (req/"divisor").toFloat  
       OK(s"Quotient: ${dividend/divisor}","text/plain").toFuture
     } catch {
       case e: NumberFormatException => ERR(s"Bad input ${req/"dividend"} - ${req/"divisor"}").toFuture
@@ -258,7 +258,7 @@ wealth of additional functionality.
 To provide a terse programming DSL an implicit class is defined to augment Option with a pipe operator:
 
 ```scala
-import org.microsauce.scetty.Router._
+import org.microsauce.scetty.implicits._
 
 . . .
 

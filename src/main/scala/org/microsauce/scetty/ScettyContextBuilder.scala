@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
   */
 object ScettyContextBuilder {
 
-  def create:ScettyContextBuilder = {
+  def create: ScettyContextBuilder = {
     new ScettyContextBuilder()
   }
 }
@@ -23,6 +23,7 @@ class ScettyContextBuilder {
   var _maxHeaderSize: Int = ScettyDefaults.maxHeaderSize
   var _maxChunkSize: Int = ScettyDefaults.maxChunkSize
   var _maxContentLength: Int = ScettyDefaults.maxContentLength
+  var _dataFactoryMinSize: Long = ScettyDefaults.dataFactoryMinSize
 
   var _routers: ListBuffer[Router] = new ListBuffer[Router]
 
@@ -35,7 +36,7 @@ class ScettyContextBuilder {
     this
   }
 
-  def addRouter(router:Router):ScettyContextBuilder = {
+  def addRouter(router: Router): ScettyContextBuilder = {
     _routers += router
     this
   }
@@ -43,7 +44,7 @@ class ScettyContextBuilder {
   /**
     * Set the address on which to bind the server
     */
-  def inetAddress(inetAddress: String):ScettyContextBuilder = {
+  def inetAddress(inetAddress: String): ScettyContextBuilder = {
     this._inetAddress = inetAddress
     this
   }
@@ -51,7 +52,7 @@ class ScettyContextBuilder {
   /**
     * Set the port on which to bind the server; default is 80
     */
-  def port(port: Int):ScettyContextBuilder = {
+  def port(port: Int): ScettyContextBuilder = {
     this._port = port
     this
   }
@@ -59,7 +60,7 @@ class ScettyContextBuilder {
   /**
     * Set the HttpRequestDecoder maxInitialLineLength; default is 4096
     */
-  def maxInitialLineLength(maxInitialLineLength: Int):ScettyContextBuilder = {
+  def maxInitialLineLength(maxInitialLineLength: Int): ScettyContextBuilder = {
     this._maxInitialLineLength = maxInitialLineLength
     this
   }
@@ -70,7 +71,7 @@ class ScettyContextBuilder {
     * @param maxHeaderSize
     * @return
     */
-  def maxHeaderSize(maxHeaderSize: Int):ScettyContextBuilder = {
+  def maxHeaderSize(maxHeaderSize: Int): ScettyContextBuilder = {
     this._maxHeaderSize = maxHeaderSize
     this
   }
@@ -81,7 +82,7 @@ class ScettyContextBuilder {
     * @param maxChunkSize
     * @return
     */
-  def maxChunkSize(maxChunkSize: Int):ScettyContextBuilder = {
+  def maxChunkSize(maxChunkSize: Int): ScettyContextBuilder = {
     this._maxChunkSize = maxChunkSize
     this
   }
@@ -91,15 +92,26 @@ class ScettyContextBuilder {
     *
     * @param maxContentLength
     */
-  def maxContentLength(maxContentLength: Int):ScettyContextBuilder = {
+  def maxContentLength(maxContentLength: Int): ScettyContextBuilder = {
     this._maxContentLength = maxContentLength
+    this
+  }
+
+  /**
+    * Set the DefaultHttpDataFactory size:  default is DefaultHttpDataFactory.MINSIZE
+    *
+    * @param dataFactoryMinSize
+    * @return
+    */
+  def dataFactoryMinSize(dataFactoryMinSize: Long): ScettyContextBuilder = {
+    this._dataFactoryMinSize = dataFactoryMinSize
     this
   }
 
   /**
     * Set the SSL flag - default is false
     */
-  def ssl(sslEnabled: Boolean):ScettyContextBuilder = {
+  def ssl(sslEnabled: Boolean): ScettyContextBuilder = {
     this._ssl = sslEnabled
     this
   }
@@ -107,7 +119,7 @@ class ScettyContextBuilder {
   /**
     * Set the path to java keystore - used to initialize the javax SSLContext
     */
-  def keystore(keystore: String):ScettyContextBuilder = {
+  def keystore(keystore: String): ScettyContextBuilder = {
     this._sslKeystore = keystore
     this
   }
@@ -115,12 +127,12 @@ class ScettyContextBuilder {
   /**
     * Set the java keystore password - used to initialize the javax SSLContext
     */
-  def keypass(keypass: String):ScettyContextBuilder = {
+  def keypass(keypass: String): ScettyContextBuilder = {
     this._keypass = keypass
     this
   }
 
-  def build:ScettyContext = {
+  def build: ScettyContext = {
     val result = new ScettyContext()
 
     result.inetAddress = _inetAddress

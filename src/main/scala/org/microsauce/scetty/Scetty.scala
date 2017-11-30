@@ -19,8 +19,8 @@ import io.netty.handler.stream.ChunkedWriteHandler
   */
 class Scetty(var ctx: ScettyContext) {
 
-  private var sslProvider:()=>SSLContext = _
-  private val routeHandler: HttpRouteMiddlewareRequestHandler = new HttpRouteMiddlewareRequestHandler
+  private var sslProvider: () => SSLContext = _
+  private var routeHandler: HttpRouteMiddlewareRequestHandler = _
   private var channelInitializer: ChannelInitializer[SocketChannel] = new HttpServerInitializer(routeHandler)
   private var contextBuilder: ScettyContextBuilder = new ScettyContextBuilder()
   private var channel: Channel = _
@@ -29,7 +29,7 @@ class Scetty(var ctx: ScettyContext) {
     this(null)
   }
 
-  private def throwIllegalStateException:Unit = {
+  private def throwIllegalStateException: Unit = {
     throw new IllegalStateException("Scetty context already assigned")
   }
 
@@ -40,7 +40,7 @@ class Scetty(var ctx: ScettyContext) {
     this
   }
 
-  def addRouter(router:Router):Scetty = {
+  def addRouter(router: Router): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.addRouter(router)
@@ -50,7 +50,7 @@ class Scetty(var ctx: ScettyContext) {
   /**
     * Set the address on which to bind the server
     */
-  def inetAddress(inetAddress: String):Scetty = {
+  def inetAddress(inetAddress: String): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.inetAddress(inetAddress)
@@ -60,7 +60,7 @@ class Scetty(var ctx: ScettyContext) {
   /**
     * Set the port on which to bind the server; default is 80
     */
-  def port(port: Int):Scetty = {
+  def port(port: Int): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.port(port)
@@ -70,7 +70,7 @@ class Scetty(var ctx: ScettyContext) {
   /**
     * Set the HttpRequestDecoder maxInitialLineLength; default is 4096
     */
-  def maxInitialLineLength(maxInitialLineLength: Int):Scetty = {
+  def maxInitialLineLength(maxInitialLineLength: Int): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.maxInitialLineLength(maxInitialLineLength)
@@ -83,7 +83,7 @@ class Scetty(var ctx: ScettyContext) {
     * @param maxHeaderSize
     * @return
     */
-  def maxHeaderSize(maxHeaderSize: Int):Scetty = {
+  def maxHeaderSize(maxHeaderSize: Int): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.maxHeaderSize(maxHeaderSize)
@@ -96,7 +96,7 @@ class Scetty(var ctx: ScettyContext) {
     * @param maxChunkSize
     * @return
     */
-  def maxChunkSize(maxChunkSize: Int):Scetty = {
+  def maxChunkSize(maxChunkSize: Int): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.maxChunkSize(maxChunkSize)
@@ -108,17 +108,24 @@ class Scetty(var ctx: ScettyContext) {
     *
     * @param maxContentLength
     */
-  def maxContentLength(maxContentLength: Int):Scetty = {
+  def maxContentLength(maxContentLength: Int): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.maxContentLength(maxContentLength)
     this
   }
 
+  def dataFactoryMinSize(dataFactoryMinSize: Long): Scetty = {
+    if (ctx != null) throwIllegalStateException
+
+    contextBuilder.dataFactoryMinSize(dataFactoryMinSize)
+    this
+  }
+
   /**
     * Set the SSL flag - default is false
     */
-  def ssl(sslEnabled: Boolean):Scetty = {
+  def ssl(sslEnabled: Boolean): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.ssl(sslEnabled)
@@ -128,7 +135,7 @@ class Scetty(var ctx: ScettyContext) {
   /**
     * Set the path to java keystore - used to initialize the javax SSLContext
     */
-  def keystore(keystore: String):Scetty = {
+  def keystore(keystore: String): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.keystore(keystore)
@@ -138,7 +145,7 @@ class Scetty(var ctx: ScettyContext) {
   /**
     * Set the java keystore password - used to initialize the javax SSLContext
     */
-  def keypass(keypass: String):Scetty = {
+  def keypass(keypass: String): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     contextBuilder.keypass(keypass)
@@ -151,7 +158,7 @@ class Scetty(var ctx: ScettyContext) {
     * @param initializer
     * @return
     */
-  def channelInit(initializer: ChannelInitializer[SocketChannel]):Scetty = {
+  def channelInit(initializer: ChannelInitializer[SocketChannel]): Scetty = {
     if (ctx != null) throwIllegalStateException
 
     channelInitializer = initializer
@@ -161,13 +168,14 @@ class Scetty(var ctx: ScettyContext) {
   /**
     * Start this Netty server instance.
     */
-  def start:Scetty = {
+  def start: Scetty = {
 
     ctx = if (ctx == null)
       contextBuilder.build
     else
       ctx
 
+    routeHandler = new HttpRouteMiddlewareRequestHandler(ctx.dataFactoryMinSize)
     routeHandler.uriRouters ++= ctx.routers
 
     if (ctx.ssl) {

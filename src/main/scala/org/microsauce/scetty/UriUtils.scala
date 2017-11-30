@@ -63,8 +63,10 @@ object UriUtils {
 
     var ndx = -1
     tokens.toList.map { token =>
-      ndx += 1
-      if (token == "*") s"*_$ndx" else token
+      if (token == "*") {
+        ndx += 1
+        s"*_$ndx"
+      } else token
     }
   }
 

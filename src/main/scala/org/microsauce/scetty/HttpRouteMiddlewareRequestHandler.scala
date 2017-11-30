@@ -18,7 +18,7 @@ object HttpRouteMiddlewareRequestHandler {
 }
 
 @Sharable
-class HttpRouteMiddlewareRequestHandler
+class HttpRouteMiddlewareRequestHandler(val dataFactoryMinSize: Long)
   extends SimpleChannelInboundHandler[FullHttpRequest] {
 
   import HttpRouteMiddlewareRequestHandler._
@@ -30,8 +30,7 @@ class HttpRouteMiddlewareRequestHandler
   import org.microsauce.scetty.implicits._
 
   val uriRouters = new ListBuffer[Router]
-  // TODO make configurable - Server/Netty config
-  val dataFactory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)
+  val dataFactory = new DefaultHttpDataFactory(dataFactoryMinSize)
 
   private implicit def makeChannelFutureListener(listener: (ChannelFuture) => Unit) =
     new ChannelFutureListener {
@@ -86,7 +85,7 @@ class HttpRouteMiddlewareRequestHandler
 
     val route = getRoute(verb, uriPath(request.getUri), false)
 
-    execRoute(new Request(verb, request, route, dataFactory, error)) match {
+    executeRoute(new Request(verb, request, route, dataFactory, error)) match {
 
       case Success(futureResponse) => for (response <- futureResponse) {
         writeResponse(ctx, response)
@@ -97,11 +96,11 @@ class HttpRouteMiddlewareRequestHandler
     }
   }
 
-  private val closeChannel: ChannelFuture => Unit = { channel =>
+  private def closeChannel(channel:ChannelFuture):Unit = {
     channel.channel().close()
   }
 
-  private def execRoute(request: Request): Try[Future[Response]] = {
+  private def executeRoute(request: Request): Try[Future[Response]] = {
     try {
       val futureResponse = request.next
 
@@ -126,7 +125,7 @@ class HttpRouteMiddlewareRequestHandler
     } catch {
       case fwdErr: Throwable =>
 
-        import org.microsauce.scetty.Router._
+        import org.microsauce.scetty.implicits._
 
         val res = new Response(
           HttpResponseStatus.INTERNAL_SERVER_ERROR,
@@ -138,7 +137,6 @@ class HttpRouteMiddlewareRequestHandler
   }
 
 
-  // TODO duplicates code in Request.uri
   private def uriPath(nettyUri: String): String = {
     val qndx = nettyUri.lastIndexOf("?")
     if (qndx < 0) nettyUri

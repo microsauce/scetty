@@ -10,6 +10,7 @@ class ScettyContext {
   var maxHeaderSize: Int = _
   var maxChunkSize: Int = _
   var maxContentLength: Int = _
+  var dataFactoryMinSize: Long = _
 
   var ssl: Boolean = _
   var sslKeystore: String = _

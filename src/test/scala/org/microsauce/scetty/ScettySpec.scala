@@ -5,6 +5,7 @@ import org.microsauce.scetty.testutils.TestUtils
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaj.http._
@@ -13,10 +14,12 @@ import scalaj.http._
 @RunWith(classOf[JUnitRunner])
 class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
+  val testRouter = new TestRouter
   val portReservation = TestUtils.reservePort
   val scettyPort = portReservation.releasePort
+
   val fixture: Scetty = new Scetty()
-    .addRouter(new TestRouter)
+    .addRouter(testRouter)
     .port(scettyPort)
 
   override def beforeAll() {
@@ -33,28 +36,45 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     fixture.stop
   }
 
-  "a GET request with uri parameter" should "correctly parse the uri parameter and insert it into the response" in {
-    val response = Http(s"http://localhost:$scettyPort/get/it/by/steve").asString
+  "GET /get/it/by/steve/and/steverson/from/there" should "correctly parse the uri parameters and insert into the response" in {
+    val response = Http(s"http://localhost:$scettyPort/get/it/by/steve/and/steverson/from/there").asString
 
-    response.body should be ("hello steve")
+    response.code should be (200)
+    response.headers("Content-Type")(0) should be ("text/html")
+    response.body should be ("hello steve steverson from there")
   }
 
-  "a POST request with json payload" should "should be deserialized and reserialized" in {
+  "POST /the/stuff" should "deserialize the request body and reserialize it in the response" in {
     val theStuff = """{"aString":"myString","anInt":7,"aList":["one","two","three"]}"""
     val response = Http(s"http://localhost:$scettyPort/the/stuff")
         .header("Content-Type", "application/json")
       .postData(theStuff).asString
 
-    info(s"actual: ${response.body}")
-    info(s"expected: $theStuff")
+    response.code should be (200)
+    response.headers("Content-Type")(0) should be ("application/json")
     response.body should be (theStuff)
+  }
+
+  "GET /do/wah/diddy/diddy" should "invoke logging middleware" in {
+    val response = Http(s"http://localhost:$scettyPort/do/wah/diddy/diddy").asString
+
+    testRouter.logMessages(0) should be ("do => wah/diddy/diddy")
+
+    response.code should be (200)
+    response.headers("Content-Type")(0) should be ("text/html")
+    response.body should be ("dum-diddy-do")
   }
 
   class TestRouter extends DefaultRouter {
 
-    get("/get/it/by/:name") { req =>
-      var name = req / "name"
-      OK(s"hello $name").toFuture
+    val logMessages = new ListBuffer[String]()
+
+    get("/get/it/by/:firstName/and/:lastName/from/*") { req =>
+      val firstName = req / "firstName"
+      val lastName = req / "lastName"
+      val from = req / "*_0"
+
+      OK(s"hello $firstName $lastName from $from").toFuture
     }
 
     post("/the/stuff") { req =>
@@ -63,7 +83,35 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
       OK(json(theStuff)).toFuture
     }
 
+    use("/do/*") { req =>
+      val doWhat = req / "*_0"
+
+      testLogInfo(s"do => $doWhat")
+
+      req.next
+    }
+
+    get("/do/you/know/what/time/it/is") { req =>
+      OK("it is 7").toFuture
+    }
+
+    post("/do/something/with/this") { req =>
+      val theStuff = req.json[TheStuff]
+
+      Future {
+        OK(theStuff.aString, "text/plain")
+      }
+    }
+
+    get("/do/wah/diddy/diddy") { req =>
+      OK("dum-diddy-do").toFuture
+    }
+
+    def testLogInfo(message:String): Unit = {
+      logMessages += message
+    }
   }
+
 
   case class TheStuff(val aString: String, val anInt: Int, val aList:List[String])
 

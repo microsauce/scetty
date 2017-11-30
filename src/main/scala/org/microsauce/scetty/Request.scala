@@ -55,19 +55,16 @@ class Request(
     */
   def &(key: String): Option[String] = {
     if (postRequestDecoder != null) {
-      val data = postRequestDecoder.getBodyHttpData(key)
-      data match {
+      postRequestDecoder.getBodyHttpData(key) match {
         case x: Attribute => Some(x.getValue)
         case _ => None
       }
     } else None
-    // TODO data ==> Attribute, FileUpload, HttpData
   }
 
   def ^^(key: String): Option[ByteBuf] = {
     if (postRequestDecoder != null) {
-      val data = postRequestDecoder.getBodyHttpData(key)
-      data match {
+      postRequestDecoder.getBodyHttpData(key) match {
         case x: FileUpload => Some(x.getByteBuf)
         case _ => None
       }
@@ -82,7 +79,8 @@ class Request(
     */
   def ?(key: String): Option[String] = {
     val value = queryStringDecoder.parameters.get(key)
-    if (value != null && value.size > 0) Some(value.get(0)) // TODO return the first element for now
+
+    if (value != null && value.size > 0) Some(value.get(0))
     else None
   }
 
@@ -243,7 +241,7 @@ class Request(
     * @param key
     * @return
     */
-  def /(key: String): String = uriParameters(key)
+  def / (key: String): String = uriParameters(key)
 
   /**
     * Execute the next handler in the route.
