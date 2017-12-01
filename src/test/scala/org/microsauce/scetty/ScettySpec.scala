@@ -23,12 +23,12 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     .port(scettyPort)
 
   override def beforeAll() {
-    val futureStart = Future {
+    Future {
       fixture.start
     }
 
     info("wait for server startup . . .")
-    Thread.sleep(5000)
+    Thread.sleep(1000)
     info(s"server listening on port [$scettyPort]")
   }
 
@@ -55,15 +55,17 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     response.body should be (theStuff)
   }
 
-  "GET /do/wah/diddy/diddy" should "invoke logging middleware" in {
+  "GET /do/wah/diddy/diddy" should "invoke middleware" in {
     val response = Http(s"http://localhost:$scettyPort/do/wah/diddy/diddy").asString
 
     testRouter.logMessages(0) should be ("do => wah/diddy/diddy")
 
     response.code should be (200)
     response.headers("Content-Type")(0) should be ("text/html")
-    response.body should be ("dum-diddy-do")
+    response.body should be (">>dum-diddy-do<<")
   }
+
+
 
   class TestRouter extends DefaultRouter {
 
@@ -91,12 +93,27 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
       req.next
     }
 
-    get("/do/you/know/what/time/it/is") { req =>
+    use("/do/wah/*") { req =>
+      val futureResponse = req.next
+
+      for (response <- futureResponse) {
+        response.source = if (response.source.isInstanceOf[String]) {
+          s">>${response.source.asInstanceOf[String]}<<"
+        } else {
+          response.source
+        }
+      }
+
+      futureResponse
+    }
+
+    get("/do/you/know/what/time/it/is") { _ =>
       OK("it is 7").toFuture
     }
 
-    post("/do/something/with/this") { req =>
+    put("/do/something/with/this") { req =>
       val theStuff = req.json[TheStuff]
+      theStuff.aString = "not your string anymore"
 
       Future {
         OK(theStuff.aString, "text/plain")
@@ -112,7 +129,6 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     }
   }
 
-
-  case class TheStuff(val aString: String, val anInt: Int, val aList:List[String])
+  case class TheStuff(var aString: String, val anInt: Int, val aList:List[String])
 
 }

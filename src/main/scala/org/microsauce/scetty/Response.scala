@@ -1,10 +1,10 @@
 package org.microsauce.scetty
 
-import java.io.{File, RandomAccessFile}
+import java.io.File
 
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.DefaultFileRegion
 import io.netty.handler.codec.http.{Cookie, DefaultHttpResponse, HttpResponseStatus}
+import io.netty.handler.stream.ChunkedFile
 import org.apache.commons.codec.Charsets
 
 import scala.concurrent.Future
@@ -17,7 +17,7 @@ import scala.concurrent.Future
  * - TextFrameResponse
  * - BinaryFrameResponse
  */
-class Response(val status:HttpResponseStatus, val source:Any, val contentType:String) {
+class Response(val status:HttpResponseStatus, var source:Any, val contentType:String) {
 
   import io.netty.handler.codec.http.HttpHeaders.Names._
   import io.netty.handler.codec.http.HttpVersion._
@@ -31,18 +31,15 @@ class Response(val status:HttpResponseStatus, val source:Any, val contentType:St
    */
   def toFuture = Future.successful(this)
 
-  /**
-   * The response body source
-   */
-  val nettySource = source match {
+  def toNettySource = source match {
     case str:String => Unpooled.copiedBuffer(str, Charsets.UTF_8)
-    case file:File =>
-      try {
-        val raf = new RandomAccessFile(file, "r")
-        new DefaultFileRegion(raf.getChannel(), 0, raf.length())
-      } catch {
-        case t: Throwable => Unpooled.copiedBuffer(s"error: ${t.getMessage}", Charsets.UTF_8)
-      }
+    case file:File => new ChunkedFile(file)
+    //      try {
+    //        val raf = new RandomAccessFile(file, "r")
+    //        new DefaultFileRegion(raf.getChannel(), 0, raf.length())
+    //      } catch {
+    //        case t: Throwable => Unpooled.copiedBuffer(s"error: ${t.getMessage}", Charsets.UTF_8)
+    //      }
     case buf:ByteBuf => Unpooled.copiedBuffer(buf)
     case bytes:Array[Byte] => Unpooled.copiedBuffer(bytes)
     case _ => Unpooled.copiedBuffer("", Charsets.UTF_8) // null content or Redirect

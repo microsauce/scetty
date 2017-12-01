@@ -1,17 +1,13 @@
 package org.microsauce.scetty
 
-// TODO cleanup
+import java.util.logging.Logger
 
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.ChannelFutureListener
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.SimpleChannelInboundHandler
-import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, FullHttpRequest}
+import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
-import io.netty.channel.ChannelFuture
+import io.netty.handler.codec.http.{FullHttpRequest, HttpResponseStatus}
+
 import scala.collection.mutable.ListBuffer
-import java.util.logging.Logger
-import io.netty.handler.codec.http.websocketx._
 
 object HttpRouteMiddlewareRequestHandler {
   val logger = Logger.getLogger(HttpRouteMiddlewareRequestHandler.getClass.toString)
@@ -22,12 +18,10 @@ class HttpRouteMiddlewareRequestHandler(val dataFactoryMinSize: Long)
   extends SimpleChannelInboundHandler[FullHttpRequest] {
 
   import HttpRouteMiddlewareRequestHandler._
-  import scala.concurrent._
+
   import scala.concurrent.ExecutionContext.Implicits.global
-  import scala.concurrent.duration._
-  import scala.util.{Try, Success, Failure}
-  import org.microsauce.scetty.util.Error
-  import org.microsauce.scetty.implicits._
+  import scala.concurrent._
+  import scala.util.{Failure, Success, Try}
 
   val uriRouters = new ListBuffer[Router]
   val dataFactory = new DefaultHttpDataFactory(dataFactoryMinSize)
@@ -86,13 +80,11 @@ class HttpRouteMiddlewareRequestHandler(val dataFactoryMinSize: Long)
     val route = getRoute(verb, uriPath(request.getUri), false)
 
     executeRoute(new Request(verb, request, route, dataFactory, error)) match {
-
       case Success(futureResponse) => for (response <- futureResponse) {
         writeResponse(ctx, response)
       }
 
       case Failure(err) => handleError(ctx, request, err)
-
     }
   }
 
@@ -138,14 +130,15 @@ class HttpRouteMiddlewareRequestHandler(val dataFactoryMinSize: Long)
 
 
   private def uriPath(nettyUri: String): String = {
-    val qndx = nettyUri.lastIndexOf("?")
-    if (qndx < 0) nettyUri
-    else nettyUri.substring(0, qndx)
+    val index = nettyUri.lastIndexOf("?")
+
+    if (index < 0) nettyUri
+    else nettyUri.substring(0, index)
   }
 
   private def writeResponse(ctx: ChannelHandlerContext, response: Response) = {
     ctx.write(response.nettyResponse)
-    ctx.writeAndFlush(response.nettySource).addListener(closeChannel)
+    ctx.writeAndFlush(response.toNettySource).addListener(closeChannel)
   }
 
 }
