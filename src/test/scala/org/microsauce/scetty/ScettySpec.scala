@@ -14,12 +14,16 @@ import scalaj.http._
 @RunWith(classOf[JUnitRunner])
 class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  val testRouter = new TestRouter
+  val logMessages = ListBuffer[String]()
+
+  val testRouter = new TestRouter(logMessages)
+  val anotherTestRouter = new AntherRouter(logMessages)
   val portReservation = TestUtils.reservePort
   val scettyPort = portReservation.releasePort
 
   val fixture: Scetty = new Scetty()
     .addRouter(testRouter)
+    .addRouter(anotherTestRouter)
     .port(scettyPort)
 
   override def beforeAll() {
@@ -58,18 +62,14 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   "GET /do/wah/diddy/diddy" should "invoke middleware" in {
     val response = Http(s"http://localhost:$scettyPort/do/wah/diddy/diddy").asString
 
-    testRouter.logMessages(0) should be ("do => wah/diddy/diddy")
+    logMessages should be (ListBuffer("do => wah/diddy/diddy","another message"))
 
     response.code should be (200)
     response.headers("Content-Type")(0) should be ("text/html")
     response.body should be (">>dum-diddy-do<<")
   }
 
-
-
-  class TestRouter extends DefaultRouter {
-
-    val logMessages = new ListBuffer[String]()
+  class TestRouter(val logMessages: ListBuffer[String]) extends DefaultRouter {
 
     get("/get/it/by/:firstName/and/:lastName/from/*") { req =>
       val firstName = req / "firstName"
@@ -127,6 +127,16 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     def testLogInfo(message:String): Unit = {
       logMessages += message
     }
+  }
+
+  class AntherRouter(val logMessages:ListBuffer[String]) extends DefaultRouter {
+
+    use("/do/wah/diddy*") { req =>
+      logMessages += "another message"
+
+      req.next
+    }
+
   }
 
   case class TheStuff(var aString: String, val anInt: Int, val aList:List[String])

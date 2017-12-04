@@ -52,6 +52,10 @@ class HttpRouteMiddlewareRequestHandler(val dataFactoryMinSize: Long)
   def getRoute(verb: HttpVerb, uri: String, isError: Boolean) = {
     val assembledRoute = new ListBuffer[HttpRequestHandler]
     for (thisRouter <- uriRouters) {
+      assembledRoute ++= thisRouter.getUse(uri)
+    }
+
+    for (thisRouter <- uriRouters) {
       assembledRoute ++= thisRouter.getRoute(verb, uri)
     }
 

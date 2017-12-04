@@ -22,12 +22,14 @@ dependencies {
   testCompile 'org.scalaj:scalaj-http_2.12:2.3.0'
 }
 
-task spec(dependsOn: ['testClasses'], type: JavaExec) {
+task spec(type: JavaExec, dependsOn: ['testClasses']) {
   main = 'org.scalatest.tools.Runner'
   args = ['-R', 'build/classes/scala/test', '-oDF']
   classpath = sourceSets.test.runtimeClasspath
 //  jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
 }
+
+build.dependsOn spec
 
 task runTest(type: JavaExec, dependsOn: classes) {
   main = 'org.microsauce.scetty.playground.TestTestApp'

@@ -17,13 +17,19 @@ trait BaseRouter {
     }
   }
 
+  def getUse(uri: String) = {
+    uriHandlers.filter { handler =>
+      requestMatchesHandler(USE, uri, handler)
+    }
+  }
+
   protected def addHandler(verb: HttpVerb, uriString: String, handler: Request => Future[Response]) {
     val uriPattern = parseUriString(uriString)
     uriHandlers += new HttpRequestHandler(verb, uriPattern, handler)
   }
 
-  private def requestMatchesHandler(verb: HttpVerb, uri: String, handler: Handler):Boolean = {
-    (verb == handler.verb || handler.verb.name == USE.name) &&
+  protected def requestMatchesHandler(verb: HttpVerb, uri: String, handler: Handler):Boolean = {
+    (verb == handler.verb/* || handler.verb.name == USE.name*/) &&
       handler.uriPattern.regex.pattern.matcher(uri).matches
   }
 
