@@ -17,7 +17,8 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   val logMessages = ListBuffer[String]()
 
   val testRouter = new TestRouter(logMessages)
-  val anotherTestRouter = new AntherRouter(logMessages)
+  val anotherTestRouter = new AnotherRouter(logMessages)
+
   val portReservation = TestUtils.reservePort
   val scettyPort = portReservation.releasePort
 
@@ -69,7 +70,27 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     response.body should be (">>dum-diddy-do<<")
   }
 
-  class TestRouter(val logMessages: ListBuffer[String]) extends DefaultRouter {
+  "GET /test.html" should "retrieve a static file" in {
+    val response = Http(s"http://localhost:$scettyPort/test.html").asString
+
+    response.code should be (200)
+    response.headers("Content-Type")(0) should be ("text/html")
+    response.body should be ("<html>Hello HTML file</html>")
+  }
+
+//  "GET /a/template" should "retrieve and render a Jade template" in {
+//    val response = Http(s"http://localhost:$scettyPort/a/template").asString
+//
+//    info(s"Jade response code ${response.code}")
+//    response.code should be (200)
+//    response.headers("Content-Type")(0) should be ("text/html")
+//    response.body should be ("DOIT")
+//  }
+
+  class TestRouter(val logMessages: ListBuffer[String]) extends Router {
+
+    override val documentRoot: String = System.getProperty("user.dir") + "/src/test/resources/docs"
+    override val templateRoot: String = System.getProperty("user.dir") + "/src/test/resources/templates"
 
     get("/get/it/by/:firstName/and/:lastName/from/*") { req =>
       val firstName = req / "firstName"
@@ -124,12 +145,17 @@ class ScettySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
       OK("dum-diddy-do").toFuture
     }
 
+    get("/a/template") { req =>
+      val attributes = Map("stuff" -> TheStuff("an attribute", 7, List("")))
+      OK(render("test.jade", attributes)).toFuture
+    }
+
     def testLogInfo(message:String): Unit = {
       logMessages += message
     }
   }
 
-  class AntherRouter(val logMessages:ListBuffer[String]) extends DefaultRouter {
+  class AnotherRouter(val logMessages:ListBuffer[String]) extends DefaultRouter {
 
     use("/do/wah/diddy*") { req =>
       logMessages += "another message"

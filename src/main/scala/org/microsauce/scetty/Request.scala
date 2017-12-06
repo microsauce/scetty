@@ -38,9 +38,9 @@ class Request(
   private var uriParameters: Map[String, String] = null
   private var routeCursor = -1
   private val attr = scala.collection.mutable.Map[String, Any]()
-  private val postRequestDecoder: HttpPostRequestDecoder = if (verb == POST || verb == PUT)
-    new HttpPostRequestDecoder(dataFactory, req)
-  else null
+  private val postRequestDecoderOption: Option[HttpPostRequestDecoder] = if (verb == POST || verb == PUT)
+    Some(new HttpPostRequestDecoder(dataFactory, req))
+  else None
 
   /**
     * The mutable cookie map.
@@ -54,21 +54,27 @@ class Request(
     * @return
     */
   def &(key: String): Option[String] = {
-    if (postRequestDecoder != null) {
-      postRequestDecoder.getBodyHttpData(key) match {
-        case x: Attribute => Some(x.getValue)
-        case _ => None
+    postRequestDecoderOption match {
+      case Some(postRequestDecoder) => {
+        postRequestDecoder.getBodyHttpData(key) match {
+          case x: Attribute => Some(x.getValue)
+          case _ => None
+        }
       }
-    } else None
+      case None => None
+    }
   }
 
   def ^^(key: String): Option[ByteBuf] = {
-    if (postRequestDecoder != null) {
-      postRequestDecoder.getBodyHttpData(key) match {
-        case x: FileUpload => Some(x.getByteBuf)
-        case _ => None
+    postRequestDecoderOption match {
+      case Some(postRequestDecoder) => {
+        postRequestDecoder.getBodyHttpData(key) match {
+          case x: FileUpload => Some(x.getByteBuf)
+          case _ => None
+        }
       }
-    } else None
+      case None => None
+    }
   }
 
   /**

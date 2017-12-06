@@ -29,7 +29,7 @@ trait BaseRouter {
   }
 
   protected def requestMatchesHandler(verb: HttpVerb, uri: String, handler: Handler):Boolean = {
-    (verb == handler.verb/* || handler.verb.name == USE.name*/) &&
+    verb == handler.verb &&
       handler.uriPattern.regex.pattern.matcher(uri).matches
   }
 

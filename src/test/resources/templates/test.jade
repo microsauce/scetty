@@ -2,16 +2,7 @@
 html(lang="en")
     head
         title= pageTitle
-        :javascript
-            if (foo) {
-                bar()
-            }
     body
-        h1 Jade - node template engine
-        #container
-            - if (youAreUsingJade)
-            p You are amazing
-            - else
-            p Get on it!
-        :coffeescript
-            alert "Hello, Coffee!"
+        h1 Jade teplate
+        -@ val stuff: TheStuff
+        h2 #{stuff.aString}
